@@ -43,21 +43,31 @@ begin
   FPos:=Tail-FPtr;
 end;
 
-procedure read(filename: string);
+procedure createH(filename: string);
 var
   f: TextFile;
+  outF: TextFile;
   line: string;
   key,name,num: string;
   lexer: TMiniLexer;
 begin
   AssignFile(f,filename);
+  AssignFile(outF,'Scintilla.h.gen');
   Reset(f);
+  Rewrite(outF);
   lexer:=TMiniLexer.Create;
   while not eof(f) do
   begin
     readln(f, line);
     if line='' then continue;
     if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
+    if line='# For SciLexer.h' then
+    begin
+      CloseFile(outF);
+      AssignFile(outF,'SciLexer.h.gen');
+      Rewrite(outF);
+    end;
+    if line='cat Provisional' then break;
     lexer.LoadText(line);
     key:=lexer.NextToken;
     if key='val' then
@@ -65,7 +75,7 @@ begin
       name:=lexer.NextToken;
       lexer.NextToken; //=
       num:=lexer.NextToken;
-      writeln('#define ',UpperCase(name),' ',num);
+      writeln(outF, '#define ',UpperCase(name),' ',num);
     end
     else if (key='fun')or(key='get')or(key='set') then
     begin
@@ -73,22 +83,15 @@ begin
       name:=lexer.NextToken;
       lexer.NextToken; //=
       num:=lexer.NextToken;
-      writeln('#define SCI_',UpperCase(name),' ',num);
+      writeln(outF, '#define SCI_',UpperCase(name),' ',num);
     end;
-    {key:=Copy(line,1,3);
-    if key='cat' then writeln('cat')
-    else if key='get' then writeln('get')
-    else if key='set' then writeln('set')
-    else if key='val' then writeln('val')
-    else if key='evt' then writeln('evt')
-    else if key='enu' then writeln('enu')
-    else if key='lex' then writeln('lex');}
   end;
   lexer.Free;
+  CloseFile(outF);
   CloseFile(f);
 end;
 
 begin
-  read('Scintilla.iface');
+  createH('Scintilla.iface');
 end.
 
