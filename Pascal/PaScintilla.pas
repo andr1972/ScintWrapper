@@ -7,16 +7,24 @@ unit PaScintilla;
 interface
 
 uses
-{$IFNDEF FPC}
-{$ELSE}
+{$IFDEF FPC}
   LCLIntf, LCLType, LMessages, LResources,
 {$ENDIF}
-  Windows, //for LoadLibrary
+{$IFDEF MSWindows}
+  Windows,
+{$ELSE}
+  libc,
+{$ENDIF}
   Classes, SysUtils, Controls, Messages;
 
 const
+{$ifdef MSWindows}
   cDScintillaDll = 'Scintilla.dll';
   cDSciLexerDll = 'SciLexer.dll';
+{$else}
+  cDScintillaDll = 'Scintilla.so';
+  cDSciLexerDll = 'SciLexer.so';
+{$endif}
 
 type
   TPaScintilla = class(TWinControl)
@@ -68,8 +76,11 @@ procedure TPaScintilla.LoadSciLibraryIfNeeded;
 begin
   if FSciDllHandle <> 0 then
     Exit;
-
+{$ifdef MSWindows}
   FSciDllHandle := LoadLibrary(PChar(FSciDllModule));
+{$else}
+  FSciDllHandle := dlopen(FSciDllModule, RTLD_LAZY);
+{$endif}
   if FSciDllHandle = 0 then
     RaiseLastOSError;
 end;
