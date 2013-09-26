@@ -35,8 +35,15 @@ begin
   Tail := Head;
   case Tail^ of
     'A'..'Z','a'..'z','_': while Tail^ in['A'..'Z','a'..'z','0'..'9','_'] do inc(Tail); //ident
-    '0'..'9': while Tail^ in['0'..'9'] do inc(Tail); //number
-    else
+    '0'..'9':
+    begin
+      if (Tail^='0')and(Tail[1]='x') then
+      begin
+        inc(Tail,2);
+        while Tail^ in['0'..'9','A'..'F','a'..'f'] do inc(Tail);
+      end
+      else while Tail^ in['0'..'9'] do inc(Tail); //number
+    end else
     begin
       if (Tail^='-') and (Tail[1] in['0'..'9']) then
       begin
