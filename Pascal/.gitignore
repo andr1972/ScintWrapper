@@ -1,3 +1,5 @@
+/lib
+/backup
 *.~*
 *.dcu
 *.cfg

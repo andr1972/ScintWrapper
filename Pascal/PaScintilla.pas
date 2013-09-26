@@ -1,19 +1,28 @@
 unit PaScintilla;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-  Windows, Classes, SysUtils, Controls, Messages;
+{$IFNDEF FPC}
+{$ELSE}
+  LCLIntf, LCLType, LMessages, LResources,
+{$ENDIF}
+  Windows, //for LoadLibrary
+  Classes, SysUtils, Controls, Messages;
 
 const
-  cDScintillaDll  = 'Scintilla.dll';
-  cDSciLexerDll   = 'SciLexer.dll';
+  cDScintillaDll = 'Scintilla.dll';
+  cDSciLexerDll = 'SciLexer.dll';
 
 type
   TPaScintilla = class(TWinControl)
   private
     FSciDllHandle: HMODULE;
-    FSciDllModule: String;
+    FSciDllModule: string;
 
     FDirectPointer: Pointer;
 
@@ -25,7 +34,7 @@ type
     procedure CreateParams(var Params: TCreateParams); override;
     procedure WMEraseBkgnd(var AMessage: TWmEraseBkgnd); message WM_ERASEBKGND;
     procedure WMGetDlgCode(var AMessage: TWMGetDlgCode); message WM_GETDLGCODE;
- public
+  public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
@@ -33,6 +42,8 @@ type
   published
 
   end;
+
+  procedure Register;
 
 implementation
 
@@ -66,11 +77,11 @@ end;
 procedure TPaScintilla.FreeSciLibrary;
 begin
   if FSciDllHandle <> 0 then
-  try
-    FreeLibrary(FSciDllHandle);
-  finally
-    FSciDllHandle := 0;
-  end;
+    try
+      FreeLibrary(FSciDllHandle);
+    finally
+      FSciDllHandle := 0;
+    end;
 end;
 
 procedure TPaScintilla.CreateWnd;
@@ -102,11 +113,20 @@ end;
 
 procedure TPaScintilla.WMGetDlgCode(var AMessage: TWMGetDlgCode);
 begin
-inherited;
+  inherited;
   // Allow key-codes like Enter, Tab, Arrows, and other to be passed to Scintilla
   AMessage.Result := AMessage.Result or DLGC_WANTARROWS or DLGC_WANTCHARS;
   AMessage.Result := AMessage.Result or DLGC_WANTTAB;
   AMessage.Result := AMessage.Result or DLGC_WANTALLKEYS;
 end;
 
+procedure Register;
+begin
+  RegisterComponents('PaScintilla', [TPaScintilla]);
+end;
+
+initialization
+{$IFDEF FPC}
+  {$I PaScint.lrs}
+{$ENDIF}
 end.
