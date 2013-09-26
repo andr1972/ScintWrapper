@@ -1,12 +1,22 @@
 unit SimpleFrm;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+{$IFDEF FPC}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, PaScintilla;
 
 type
+
+  { TForm1 }
+
   TForm1 = class(TForm)
     PaScintilla1: TPaScintilla;
   private
