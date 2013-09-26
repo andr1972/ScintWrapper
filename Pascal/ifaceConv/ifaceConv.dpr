@@ -4,32 +4,6 @@ program ifaceConv;
 uses
   SysUtils;
 
-procedure read(filename: string);
-var
-  f: TextFile;
-  line: string;
-  key: string[3];
-begin
-  AssignFile(f,filename);
-  Reset(f);
-  while not eof(f) do
-  begin
-    readln(f, line);
-    if line='' then continue;
-    if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
-    key:=Copy(line,1,3);
-    if key='cat' then writeln('cat')
-    else if key='fun' then writeln('fun')
-    else if key='get' then writeln('get')
-    else if key='set' then writeln('set')
-    else if key='val' then writeln('val')
-    else if key='evt' then writeln('evt')
-    else if key='enu' then writeln('enu')
-    else if key='lex' then writeln('lex');
-  end;
-  CloseFile(f);
-end;
-
 type
   TMiniLexer = class
   private
@@ -69,17 +43,45 @@ begin
   FPos:=Tail-FPtr;
 end;
 
+procedure read(filename: string);
 var
-  Str: string = 'fun void InsertText=2003(position pos, string text)';
-  Token: string;
+  f: TextFile;
+  line: string;
+  key,name,num: string;
   lexer: TMiniLexer;
 begin
+  AssignFile(f,filename);
+  Reset(f);
   lexer:=TMiniLexer.Create;
-  lexer.LoadText(Str);
-  repeat
-    Token:=lexer.NextToken;
-    if Token<>'' then writeln(Token);
-  until Token='';
+  while not eof(f) do
+  begin
+    readln(f, line);
+    if line='' then continue;
+    if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
+    lexer.LoadText(line);
+    key:=lexer.NextToken;
+    if key='fun' then
+    begin
+      lexer.NextToken; //type
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=lexer.NextToken;
+      writeln('#define SCI_',UpperCase(name),' ',num);
+    end;
+    {key:=Copy(line,1,3);
+    if key='cat' then writeln('cat')
+    else if key='get' then writeln('get')
+    else if key='set' then writeln('set')
+    else if key='val' then writeln('val')
+    else if key='evt' then writeln('evt')
+    else if key='enu' then writeln('enu')
+    else if key='lex' then writeln('lex');}
+  end;
   lexer.Free;
-  //read('Scintilla.iface');
+  CloseFile(f);
+end;
+
+begin
+  read('Scintilla.iface');
 end.
+
