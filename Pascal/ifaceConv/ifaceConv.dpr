@@ -82,6 +82,12 @@ begin
       AssignFile(outF,'SciLexer.h.gen');
       Rewrite(outF);
     end;
+    if line='# Events' then
+    begin
+      CloseFile(outF);
+      AssignFile(outF,'Scintilla.h.gen');
+      Append(outF);
+    end;
     if line='cat Provisional' then break;
     lexer.LoadText(line);
     key:=lexer.NextToken;
@@ -99,6 +105,13 @@ begin
       lexer.NextToken; //=
       num:=lexer.NextToken;
       writeln(outF, '#define SCI_',UpperCase(name),' ',num);
+    end else if key='evt' then
+    begin
+      lexer.NextToken; //type
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=lexer.NextToken;
+      writeln(outF, '#define SCN_',UpperCase(name),' ',num);
     end;
   end;
   lexer.Free;
