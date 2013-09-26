@@ -56,18 +56,21 @@ begin
   result:='';
   Head := FPtr+FPos;
   if Head^=#0 then exit;
-  while (Head^ in[#1..' ']) do inc(Head); //without #0
+  while (Head^ in[#1..' ']) do inc(Head); //white chars without #0
   if Head^=#0 then exit;
   Tail := Head;
-  while not (Tail^ in[#0..' ']) do inc(Tail);//with #0
+  case Tail^ of
+    'A'..'Z','a'..'z': while Tail^ in['A'..'Z','a'..'z','0'..'9'] do inc(Tail); //ident
+    '0'..'9': while Tail^ in['0'..'9'] do inc(Tail); //number
+    else inc(Tail); //token = one char
+  end;
   SetString(result, Head, Tail-Head);
-  while (Tail^ in[#1..' ']) do inc(Tail);//without #0
+  while (Tail^ in[#1..' ']) do inc(Tail);//white chars without #0
   FPos:=Tail-FPtr;
 end;
 
 var
   Str: string = 'fun void InsertText=2003(position pos, string text)';
-  Pos: integer=0;
   Token: string;
   lexer: TMiniLexer;
 begin
