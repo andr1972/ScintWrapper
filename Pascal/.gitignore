@@ -1,5 +1,5 @@
-/lib
-/backup
+lib
+backup
 *.~*
 *.dcu
 *.cfg
@@ -7,3 +7,9 @@
 *.dsk
 *.res
 *.ddp
+
+*.ppu
+*.o
+*.or
+*.compiled
+*.lps

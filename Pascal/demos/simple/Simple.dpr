@@ -1,6 +1,14 @@
 program Simple;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 uses
+{$IFNDEF FPC}
+{$ELSE}
+  Interfaces,
+{$ENDIF}
   Forms,
   SimpleFrm in 'SimpleFrm.pas' {Form1};
 
