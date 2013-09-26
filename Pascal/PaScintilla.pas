@@ -23,7 +23,8 @@ type
   protected
     procedure CreateWnd; override;
     procedure CreateParams(var Params: TCreateParams); override;
-
+    procedure WMEraseBkgnd(var AMessage: TWmEraseBkgnd); message WM_ERASEBKGND;
+    procedure WMGetDlgCode(var AMessage: TWMGetDlgCode); message WM_GETDLGCODE;
  public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -89,5 +90,23 @@ begin
   CreateSubClass(Params, 'SCINTILLA');
 end;
 
+
+procedure TPaScintilla.WMEraseBkgnd(var AMessage: TWmEraseBkgnd);
+begin
+  if csDesigning in ComponentState then
+    inherited
+  else
+    // Erase background not performed, prevent flickering
+    AMessage.Result := 0;
+end;
+
+procedure TPaScintilla.WMGetDlgCode(var AMessage: TWMGetDlgCode);
+begin
+inherited;
+  // Allow key-codes like Enter, Tab, Arrows, and other to be passed to Scintilla
+  AMessage.Result := AMessage.Result or DLGC_WANTARROWS or DLGC_WANTCHARS;
+  AMessage.Result := AMessage.Result or DLGC_WANTTAB;
+  AMessage.Result := AMessage.Result or DLGC_WANTALLKEYS;
+end;
 
 end.
