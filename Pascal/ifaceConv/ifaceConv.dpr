@@ -36,7 +36,15 @@ begin
   case Tail^ of
     'A'..'Z','a'..'z','_': while Tail^ in['A'..'Z','a'..'z','0'..'9','_'] do inc(Tail); //ident
     '0'..'9': while Tail^ in['0'..'9'] do inc(Tail); //number
-    else inc(Tail); //token = one char
+    else
+    begin
+      if (Tail^='-') and (Tail[1] in['0'..'9']) then
+      begin
+        inc(Tail);
+        while Tail^ in['0'..'9'] do inc(Tail);
+      end else
+      inc(Tail); //token = one char
+    end;
   end;
   SetString(result, Head, Tail-Head);
   while (Tail^ in[#1..' ']) do inc(Tail);//white chars without #0
