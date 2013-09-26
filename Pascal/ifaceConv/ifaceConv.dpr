@@ -34,7 +34,7 @@ begin
   if Head^=#0 then exit;
   Tail := Head;
   case Tail^ of
-    'A'..'Z','a'..'z': while Tail^ in['A'..'Z','a'..'z','0'..'9'] do inc(Tail); //ident
+    'A'..'Z','a'..'z','_': while Tail^ in['A'..'Z','a'..'z','0'..'9','_'] do inc(Tail); //ident
     '0'..'9': while Tail^ in['0'..'9'] do inc(Tail); //number
     else inc(Tail); //token = one char
   end;
@@ -60,7 +60,14 @@ begin
     if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
     lexer.LoadText(line);
     key:=lexer.NextToken;
-    if key='fun' then
+    if key='val' then
+    begin
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=lexer.NextToken;
+      writeln('#define ',UpperCase(name),' ',num);
+    end
+    else if (key='fun')or(key='get')or(key='set') then
     begin
       lexer.NextToken; //type
       name:=lexer.NextToken;
