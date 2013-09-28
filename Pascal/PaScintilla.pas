@@ -26,7 +26,7 @@ const
 
 type
   TPaScintillaFunction = function(APointer: Pointer; AMessage: Integer; WParam: Integer; LParam: Integer): Integer; cdecl;
-  TPaScintillaMethod = (smWindows, smDirect);
+  TPaScintillaMethod = (smMessages, smDirect);
 
   TKeyMod = LongWord; //Key + (Mod << 16)
   TPosition = integer;
@@ -62,6 +62,10 @@ type
     chrg: TSciCharacterRange;         // Range of characters to print
   end;
 
+  SC_WRAP = ( SC_WRAP_NONE=0,
+              SC_WRAP_WORD=1,
+              SC_WRAP_CHAR=2);
+
   TPaScintilla = class(TWinControl)
   private
     FSciDllHandle: HMODULE;
@@ -85,6 +89,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure AddText(const AText: AnsiString);
+    procedure ClearAll;
+    function GetLength: integer;
+    procedure SetWrapMode(Wrap: SC_WRAP);
   published
     property AccessMethod: TPaScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
   end;
@@ -184,11 +191,6 @@ begin
   AMessage.Result := AMessage.Result or DLGC_WANTALLKEYS;
 end;
 
-procedure TPaScintilla.AddText(const AText: AnsiString);
-begin
-  SendEditor(SCI_ADDTEXT, Length(AText), integer(PAnsiChar(AText)));
-end;
-
 procedure Register;
 begin
   RegisterComponents('PaScintilla', [TPaScintilla]);
@@ -197,22 +199,39 @@ end;
 procedure TPaScintilla.CNNotify(var AMessage: TWMNotify);
 begin
   if HandleAllocated and (AMessage.NMHdr^.hwndFrom = Self.Handle) then
-    writeln(AMessage.NMHdr^.code)
+    //writeln(AMessage.NMHdr^.code)
   else
     inherited;
 end;
 
-
-
 function TPaScintilla.SendEditor(AMessage, WParam,
   LParam: Integer): Integer;
 begin
-  if (FAccessMethod = smWindows) then
+  if (FAccessMethod = smMessages) then
     Result := Windows.SendMessage(Self.Handle, AMessage, WParam, LParam)
   else
     Result := FDirectFunction(FDirectPointer, AMessage, WParam, LParam);
 end;
 
+procedure TPaScintilla.AddText(const AText: AnsiString);
+begin
+  SendEditor(SCI_ADDTEXT, Length(AText), integer(PAnsiChar(AText)));
+end;
+
+procedure TPaScintilla.ClearAll;
+begin
+  SendEditor(SCI_CLEARALL);
+end;
+
+function TPaScintilla.GetLength: integer;
+begin
+  result:=SendEditor(SCI_GETLENGTH);
+end;
+
+procedure TPaScintilla.SetWrapMode(Wrap: SC_WRAP);
+begin
+  SendEditor(SCI_SETWRAPMODE, integer(Wrap));
+end;
 
 initialization
 {$IFDEF FPC}
