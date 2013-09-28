@@ -222,7 +222,7 @@ end;
 
 begin
   //createH('Scintilla.iface');
-  //createPas('Scintilla.iface');
-  dump_types;
+  createPas('Scintilla.iface');
+  //dump_types;
 end.
 

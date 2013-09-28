@@ -84,7 +84,7 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AddText;
+    procedure AddText(const AText: AnsiString);
   published
     property AccessMethod: TPaScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
   end;
@@ -184,9 +184,9 @@ begin
   AMessage.Result := AMessage.Result or DLGC_WANTALLKEYS;
 end;
 
-procedure TPaScintilla.AddText;
+procedure TPaScintilla.AddText(const AText: AnsiString);
 begin
-  SendEditor(SCI_ADDTEXT, 4, integer(PAnsiChar('1234')));
+  SendEditor(SCI_ADDTEXT, Length(AText), integer(PAnsiChar(AText)));
 end;
 
 procedure Register;

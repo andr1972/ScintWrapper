@@ -36,12 +36,12 @@ implementation
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  PaScintilla1.AddText;
+  PaScintilla1.AddText('1234');
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  PaScintilla1.AddText;
+  PaScintilla1.AddText('abcd');
 end;
 
 end.

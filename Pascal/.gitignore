@@ -1,3 +1,5 @@
+*.gen
+
 lib
 backup
 *.~*
