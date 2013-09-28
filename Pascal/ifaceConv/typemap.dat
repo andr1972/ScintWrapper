@@ -1,0 +1,12 @@
+bool Boolean
+cells TSciCell
+colour TColor
+findtext TSciTextToFind
+formatrange TSciRangeToFormat
+int Integer
+keymod TKeyMod
+position TPosition
+string PAnsiChar
+stringresult PAnsiChar
+textrange TSciCharacterRange
+

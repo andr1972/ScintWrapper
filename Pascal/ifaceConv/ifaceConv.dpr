@@ -119,7 +119,110 @@ begin
   CloseFile(f);
 end;
 
+procedure dump_types;
+var
+  f: TextFile;
+  line: string;
+  type_,key,name,num,str: string;
+  lexer: TMiniLexer;
 begin
-  createH('Scintilla.iface');
+  AssignFile(f,'Scintilla.iface');
+  Reset(f);
+  lexer:=TMiniLexer.Create;
+  while not eof(f) do
+  begin
+    readln(f, line);
+    if line='' then continue;
+    if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
+    if line='cat Provisional' then break;
+    lexer.LoadText(line);
+    key:=lexer.NextToken;
+    if (key='fun')or(key='get')or(key='set')or(key='evt') then
+    begin
+      type_:=lexer.NextToken; //type
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=lexer.NextToken;
+      writeln(type_);
+      str:=lexer.NextToken;
+      Assert(str='(');
+      repeat
+        type_:=lexer.NextToken;
+        if type_=',' then continue;
+        if type_=')' then break;
+        writeln(type_);
+        name:=lexer.NextToken;
+        if name=',' then continue;
+        if name=')' then break;
+        str:=lexer.NextToken;
+        Assert((str=',')or(str=')'));
+      until str=')';
+    end;
+  end;
+  lexer.Free;
+  CloseFile(f);
+end;
+
+function Hex2Pas(numstr: string): string;
+begin
+  if (Length(numstr)>2)and(numstr[1]='0')and(numstr[2]='x') then
+    result:='$'+Copy(numstr,3,Length(numstr)-2)
+  else result:=numstr;
+end;
+
+procedure createPas(filename: string);
+var
+  f: TextFile;
+  outF: TextFile;
+  line: string;
+  key,name,num: string;
+  lexer: TMiniLexer;
+begin
+  AssignFile(f,filename);
+  AssignFile(outF,'pas.gen');
+  Reset(f);
+  Rewrite(outF);
+  writeln(outF, 'const');
+  lexer:=TMiniLexer.Create;
+  while not eof(f) do
+  begin
+    readln(f, line);
+    if line='' then continue;
+    if (Length(line)>=2)and(line[1]='#')and(line[2]='#') then continue;
+    if line='cat Provisional' then break;
+    lexer.LoadText(line);
+    key:=lexer.NextToken;
+    if key='val' then
+    begin
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=Hex2Pas(lexer.NextToken);
+      writeln(outF, '  ',UpperCase(name),' = ',num,';');
+    end
+    else if (key='fun')or(key='get')or(key='set') then
+    begin
+      lexer.NextToken; //type
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=Hex2Pas(lexer.NextToken);
+      writeln(outF, '  SCI_',UpperCase(name),' = ',num,';');
+    end else if key='evt' then
+    begin
+      lexer.NextToken; //type
+      name:=lexer.NextToken;
+      lexer.NextToken; //=
+      num:=Hex2Pas(lexer.NextToken);
+      writeln(outF, '  SCN_',UpperCase(name),' = ',num,';');
+    end;
+  end;
+  lexer.Free;
+  CloseFile(outF);
+  CloseFile(f);
+end;
+
+begin
+  //createH('Scintilla.iface');
+  //createPas('Scintilla.iface');
+  dump_types;
 end.
 

@@ -1,3 +1,4 @@
+{$apptype console}
 program Simple;
 
 {$IFDEF FPC}
