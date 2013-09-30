@@ -88,120 +88,16 @@ begin
   // Hypertext default is used for all the document's text
   SetAStyle(SCE_H_DEFAULT, clBlack);
 
-  // Unknown tags and attributes are highlighed in red.
-  // If a tag is actually OK, it should be added in lower case to the htmlKeyWords string.
-  SetAStyle(SCE_H_TAG, darkBlue);
+  FOwner.SendEditor(SCI_STYLESETBOLD, SCE_H_TAG, 1);
   SetAStyle(SCE_H_TAGUNKNOWN, red);
-  SetAStyle(SCE_H_ATTRIBUTE, darkBlue);
+  SetAStyle(SCE_H_ATTRIBUTE, darkGreen);
   SetAStyle(SCE_H_ATTRIBUTEUNKNOWN, red);
+  SetAStyle(SCE_H_DOUBLESTRING, clFuchsia);
+  SetAStyle(SCE_H_SINGLESTRING, clFuchsia);
+  SetAStyle(SCE_H_CDATA, clYellow offWhite);
   SetAStyle(SCE_H_NUMBER, TColor($800080));
-  SetAStyle(SCE_H_DOUBLESTRING, TColor($008000));
-  SetAStyle(SCE_H_SINGLESTRING, TColor($008000));
-  SetAStyle(SCE_H_OTHER, TColor($800080));
-  SetAStyle(SCE_H_COMMENT, TColor($808000));
-  SetAStyle(SCE_H_ENTITY, TColor($800080));
-
-  SetAStyle(SCE_H_TAGEND, darkBlue);
-  SetAStyle(SCE_H_XMLSTART, darkBlue);	// <?
-  SetAStyle(SCE_H_XMLEND, darkBlue);		// ?>
-  SetAStyle(SCE_H_SCRIPT, darkBlue);		// <script
-  SetAStyle(SCE_H_ASP, TColor($4F4F00), TColor($FFFF00));	// <% ... %>
-  SetAStyle(SCE_H_ASPAT, TColor($4F4F00), TColor($FFFF00));	// <%@ ... %>
-
-  SetAStyle(SCE_HB_DEFAULT, clBlack);
-  SetAStyle(SCE_HB_COMMENTLINE, darkGreen);
-  SetAStyle(SCE_HB_NUMBER, TColor($008080));
-  SetAStyle(SCE_HB_WORD, darkBlue);
-  FOwner.SendEditor(SCI_STYLESETBOLD, SCE_HB_WORD, 1);
-  SetAStyle(SCE_HB_STRING, TColor($800080));
-  SetAStyle(SCE_HB_IDENTIFIER, clBlack);
-
-  // This light blue is found in the windows system palette so is safe to use even in 256 colour modes.
-  lightBlue := TColor($A6CAF0);
-	// Show the whole section of VBScript with light blue background
-	for bstyle:=SCE_HB_DEFAULT to SCE_HB_STRINGEOL do
-        begin
-		FOwner.SendEditor(SCI_STYLESETFONT, bstyle,
-			integer(PAnsiChar('Georgia')));
-		FOwner.SendEditor(SCI_STYLESETBACK, bstyle, lightBlue);
-		// This call extends the backround colour of the last style on the line to the edge of the window
-		FOwner.SendEditor(SCI_STYLESETEOLFILLED, bstyle, 1);
-        end;
-	FOwner.SendEditor(SCI_STYLESETBACK, SCE_HB_STRINGEOL, TColor($7F7FFF));
-	FOwner.SendEditor(SCI_STYLESETFONT, SCE_HB_COMMENTLINE,
-		integer(PAnsiChar('Comic Sans MS')));
-
-	SetAStyle(SCE_HBA_DEFAULT, clBlack);
-	SetAStyle(SCE_HBA_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HBA_NUMBER, TColor($008080));
-	SetAStyle(SCE_HBA_WORD, darkBlue);
-	FOwner.SendEditor(SCI_STYLESETBOLD, SCE_HBA_WORD, 1);
-	SetAStyle(SCE_HBA_STRING, TColor($800080));
-	SetAStyle(SCE_HBA_IDENTIFIER, clBlack);
-
-	// Show the whole section of ASP VBScript with bright yellow background
-	for bastyle:=SCE_HBA_DEFAULT to SCE_HBA_STRINGEOL do
-        begin
-		FOwner.SendEditor(SCI_STYLESETFONT, bastyle,
-			integer(PAnsiChar('Georgia')));
-		FOwner.SendEditor(SCI_STYLESETBACK, bastyle, TColor($FFFF00));
-		// This call extends the backround colour of the last style on the line to the edge of the window
-		FOwner.SendEditor(SCI_STYLESETEOLFILLED, bastyle, 1);
-        end;
-	FOwner.SendEditor(SCI_STYLESETBACK, SCE_HBA_STRINGEOL, TColor($CFCF7F));
-	FOwner.SendEditor(SCI_STYLESETFONT, SCE_HBA_COMMENTLINE,
-		integer(PAnsiChar('Comic Sans MS')));
-
-	// If there is no need to support embedded Javascript, the following code can be dropped.
-	// Javascript will still be correctly processed but will be displayed in just the default style.
-
-	SetAStyle(SCE_HJ_START, TColor($808000));
-	SetAStyle(SCE_HJ_DEFAULT, clBlack);
-	SetAStyle(SCE_HJ_COMMENT, darkGreen);
-	SetAStyle(SCE_HJ_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HJ_COMMENTDOC, darkGreen);
-	SetAStyle(SCE_HJ_NUMBER, TColor($008080));
-	SetAStyle(SCE_HJ_WORD, clBlack);
-	SetAStyle(SCE_HJ_KEYWORD, darkBlue);
-	SetAStyle(SCE_HJ_DOUBLESTRING, TColor($800080));
-	SetAStyle(SCE_HJ_SINGLESTRING, TColor($800080));
-	SetAStyle(SCE_HJ_SYMBOLS, clBlack);
-
-	SetAStyle(SCE_HJA_START, TColor($808000));
-	SetAStyle(SCE_HJA_DEFAULT, clBlack);
-	SetAStyle(SCE_HJA_COMMENT, darkGreen);
-	SetAStyle(SCE_HJA_COMMENTLINE, darkGreen);
-	SetAStyle(SCE_HJA_COMMENTDOC, darkGreen);
-	SetAStyle(SCE_HJA_NUMBER, TColor($008080));
-	SetAStyle(SCE_HJA_WORD, clBlack);
-	SetAStyle(SCE_HJA_KEYWORD, darkBlue);
-	SetAStyle(SCE_HJA_DOUBLESTRING, TColor($800080));
-	SetAStyle(SCE_HJA_SINGLESTRING, TColor($800080));
-	SetAStyle(SCE_HJA_SYMBOLS, clBlack);
-
-	// Show the whole section of Javascript with off white background
-	for jstyle:=SCE_HJ_DEFAULT to SCE_HJ_SYMBOLS do
-        begin
-		FOwner.SendEditor(SCI_STYLESETFONT, jstyle,
-			integer(PAnsiChar('Lucida Sans Unicode')));
-		FOwner.SendEditor(SCI_STYLESETBACK, jstyle, offWhite);
-		FOwner.SendEditor(SCI_STYLESETEOLFILLED, jstyle, 1);
-        end;
-	FOwner.SendEditor(SCI_STYLESETBACK, SCE_HJ_STRINGEOL, TColor($DFDF7F));
-	FOwner.SendEditor(SCI_STYLESETEOLFILLED, SCE_HJ_STRINGEOL, 1);
-
-	// Show the whole section of Javascript with brown background
-	for jastyle:=SCE_HJA_DEFAULT to SCE_HJA_SYMBOLS do
-        begin
-		FOwner.SendEditor(SCI_STYLESETFONT, jastyle,
-			integer(PAnsiChar('Lucida Sans Unicode')));
-		FOwner.SendEditor(SCI_STYLESETBACK, jastyle, TColor($DFDF7F));
-		FOwner.SendEditor(SCI_STYLESETEOLFILLED, jastyle, 1);
-        end;
-	FOwner.SendEditor(SCI_STYLESETBACK, SCE_HJA_STRINGEOL, TColor($00AF5F));
-	FOwner.SendEditor(SCI_STYLESETEOLFILLED, SCE_HJA_STRINGEOL, 1);
-
-        FOwner.SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.html')), integer(PAnsiChar(AnsiString('1'))) );
+  SetAStyle(SCE_H_COMMENT, TColor($008080));
+  FOwner.SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.html')), integer(PAnsiChar(AnsiString('1'))) );
 end;
 
 end.
