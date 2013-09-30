@@ -142,6 +142,7 @@ type
     procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure InitDefaults;
     procedure AddText(ALength: integer; AText: PAnsiChar); overload;
     procedure AddText(const AText: AnsiString); overload;
     procedure ClearAll;
@@ -153,6 +154,8 @@ type
     property AccessMethod: TScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
     property Lexer: TLexer read FLexer;
     property LexerClass: TLexerClass read FLexerClass write SetLexerClass;
+    property Align;
+    property Anchors;
   end;
 
   procedure Register;
@@ -173,6 +176,7 @@ begin
   Width := 320;
   Height := 240;
   HandleNeeded;
+  InitDefaults;
 end;
 
 destructor TScintilla.Destroy;
@@ -180,6 +184,14 @@ begin
   inherited Destroy;
   FLexer.Free;
   FreeSciLibrary;
+end;
+
+procedure TScintilla.InitDefaults;
+begin
+  SendEditor(SCI_STYLESETFORE, STYLE_DEFAULT, clBlack);
+  SendEditor(SCI_STYLESETBACK, STYLE_DEFAULT, clWhite);
+  SendEditor(SCI_STYLESETSIZE, STYLE_DEFAULT, 10);
+  SendEditor(SCI_STYLESETFONT, STYLE_DEFAULT, integer(PAnsiChar('Courier New')));
 end;
 
 procedure TScintilla.LoadSciLibraryIfNeeded;
