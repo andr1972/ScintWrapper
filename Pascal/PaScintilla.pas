@@ -66,14 +66,65 @@ type
               SC_WRAP_WORD=1,
               SC_WRAP_CHAR=2);
 
+  type
+  TSciNotifyHeader = TNMHdr;
+
+  PSciSCNotification = ^TSciSCNotification;
+  TSciSCNotification = packed record
+    NotifyHeader: TSciNotifyHeader;
+    position: Integer;
+	  // SCN_STYLENEEDED, SCN_DOUBLECLICK, SCN_MODIFIED, SCN_MARGINCLICK,
+	  // SCN_NEEDSHOWN, SCN_DWELLSTART, SCN_DWELLEND, SCN_CALLTIPCLICK,
+	  // SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK, SCN_HOTSPOTRELEASECLICK,
+	  // SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
+	  // SCN_USERLISTSELECTION, SCN_AUTOCSELECTION
+
+    ch: Integer;                    // SCN_CHARADDED, SCN_KEY
+    modifiers: Integer;
+	  // SCN_KEY, SCN_DOUBLECLICK, SCN_HOTSPOTCLICK, SCN_HOTSPOTDOUBLECLICK,
+	  // SCN_HOTSPOTRELEASECLICK, SCN_INDICATORCLICK, SCN_INDICATORRELEASE,
+
+    modificationType: Integer;      // SCN_MODIFIED
+    text: PAnsiChar;                // SCN_MODIFIED
+    length: Integer;                // SCN_MODIFIED
+    linesAdded: Integer;            // SCN_MODIFIED
+    message: Integer;               // SCN_MACRORECORD
+    wParam: Integer;                // SCN_MACRORECORD
+    lParam: Integer;                // SCN_MACRORECORD
+    line: Integer;                  // SCN_MODIFIED
+    foldLevelNow: Integer;          // SCN_MODIFIED
+    foldLevelPrev: Integer;         // SCN_MODIFIED
+    margin: Integer;                // SCN_MARGINCLICK
+    listType: Integer;              // SCN_USERLISTSELECTION
+    x: Integer;                     // SCN_DWELLSTART, SCN_DWELLEND
+    y: Integer;                     // SCN_DWELLSTART, SCN_DWELLEND
+    token: Integer;                 // SCN_MODIFIED with SC_MOD_CONTAINER
+    annotationLinesAdded: Integer;	// SCN_MODIFIED with SC_MOD_CHANGEANNOTATION
+    updated: Integer;	              // SCN_UPDATEUI
+  end;
+
+  TPaScintilla = class;
+
+  TLexer = class
+  protected
+    FOwner: TPaScintilla;
+  public
+    constructor Create(AOwner: TPaScintilla); virtual;
+    procedure InitDefaults; virtual; abstract;
+  end;
+  TLexerClass = class of TLexer;
+
   TPaScintilla = class(TWinControl)
   private
     FSciDllHandle: HMODULE;
     FDirectPointer: Pointer;
     FDirectFunction: TPaScintillaFunction;
     FAccessMethod: TPaScintillaMethod;
+    FLexer: TLexer;
+    FLexerClass: TLexerClass;
     procedure LoadSciLibraryIfNeeded;
     procedure FreeSciLibrary;
+    procedure SetLexerClass(const Value: TLexerClass);
   protected
     procedure CreateWnd; override;
     procedure CreateParams(var Params: TCreateParams); override;
@@ -83,24 +134,35 @@ type
     procedure WMDestroy(var AMessage: TWMDestroy); message WM_DESTROY;
     /// <summary>Handles notification messages from Scintilla</summary>
     procedure CNNotify(var AMessage: TWMNotify); message CN_NOTIFY;
-      /// <summary>Sends message to Scintilla control.
-    function SendEditor(AMessage: Integer; WParam: Integer = 0; LParam: Integer = 0): Integer;
+    procedure MarginClick(nmhdr: PNMHdr);
   public
+    /// <summary>Sends message to Scintilla control.
+    function SendEditor(AMessage: Integer; WParam: Integer = 0; LParam: Integer = 0): Integer;
+    procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AddText(const AText: AnsiString);
+    procedure AddText(ALength: integer; AText: PAnsiChar); overload;
+    procedure AddText(const AText: AnsiString); overload;
     procedure ClearAll;
     function GetLength: integer;
     procedure SetWrapMode(Wrap: SC_WRAP);
+    procedure SetLexer(lexer: integer);
+    procedure SetLexerLanguage(language: PAnsiChar);
   published
     property AccessMethod: TPaScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
+    property Lexer: TLexer read FLexer;
+    property LexerClass: TLexerClass read FLexerClass write SetLexerClass;
   end;
 
   procedure Register;
 
+  {$I pas.gen}
 implementation
 
-{$I pas.gen}
+uses
+  Dialogs;
+
+
 { TPaScintilla }
 
 constructor TPaScintilla.Create(AOwner: TComponent);
@@ -115,6 +177,7 @@ end;
 destructor TPaScintilla.Destroy;
 begin
   inherited Destroy;
+  FLexer.Free;
   FreeSciLibrary;
 end;
 
@@ -196,11 +259,28 @@ begin
   RegisterComponents('PaScintilla', [TPaScintilla]);
 end;
 
+procedure TPaScintilla.MarginClick(nmhdr: PNMHdr);
+var
+  notify: PSciSCNotification;
+  line_number: integer;
+begin
+  notify:=PSciSCNotification(nmhdr);
+  //const int modifiers = notify->modifiers;
+  //const int position = notify->position;
+  //const int margin = notify->margin;
+  line_number := SendEditor(SCI_LINEFROMPOSITION, notify.position);
+  case notify.margin of
+    1: SendEditor(SCI_TOGGLEFOLD, line_number, 0);
+  end;
+end;
+
 procedure TPaScintilla.CNNotify(var AMessage: TWMNotify);
 begin
   if HandleAllocated and (AMessage.NMHdr^.hwndFrom = Self.Handle) then
+  begin
+    if AMessage.NMHdr^.code=SCN_MARGINCLICK then MarginClick(AMessage.NMHdr);
     //writeln(AMessage.NMHdr^.code)
-  else
+  end else
     inherited;
 end;
 
@@ -211,6 +291,11 @@ begin
     Result := Windows.SendMessage(Self.Handle, AMessage, WParam, LParam)
   else
     Result := FDirectFunction(FDirectPointer, AMessage, WParam, LParam);
+end;
+
+procedure TPaScintilla.AddText(ALength: integer; AText: PAnsiChar);
+begin
+  SendEditor(SCI_ADDTEXT, ALength, integer(AText));
 end;
 
 procedure TPaScintilla.AddText(const AText: AnsiString);
@@ -231,6 +316,53 @@ end;
 procedure TPaScintilla.SetWrapMode(Wrap: SC_WRAP);
 begin
   SendEditor(SCI_SETWRAPMODE, integer(Wrap));
+end;
+
+procedure TPaScintilla.SetLexer(lexer: integer);
+begin
+  SendEditor(SCI_SETLEXER, lexer);
+end;
+
+procedure TPaScintilla.SetLexerLanguage(language: PAnsiChar);
+begin
+  SendEditor(SCI_SETLEXERLANGUAGE, 0, integer(language));
+end;
+
+procedure TPaScintilla.Fold;
+begin
+  SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold')), integer(PAnsiChar(AnsiString('1'))) );
+  SendEditor(SCI_SETMARGINWIDTHN, 1, 0);
+  SendEditor(SCI_SETMARGINSENSITIVEN, 1, 1);
+  SendEditor(SCI_SETMARGINTYPEN,  1, SC_MARGIN_SYMBOL);
+  SendEditor(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);
+  SendEditor(SCI_SETMARGINWIDTHN, 1, 16);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDER, SC_MARK_PLUS);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPEN, SC_MARK_MINUS);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEREND, SC_MARK_EMPTY);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_EMPTY);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_EMPTY);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB, SC_MARK_EMPTY);
+  SendEditor(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL, SC_MARK_EMPTY);
+  SendEditor(SCI_SETFOLDFLAGS, 16, 0); // 16  	Draw line below if not expanded
+  SendEditor(SCI_SETMARGINCURSORN, 1, 0);
+end;
+
+procedure TPaScintilla.SetLexerClass(const Value: TLexerClass);
+begin
+  if Value<>FLexerClass then
+  begin
+    FLexer.Free;
+    FLexerClass := Value;
+    FLexer:=FLexerClass.Create(self);
+    FLexer.InitDefaults;
+  end;
+end;
+
+{ TLexer }
+
+constructor TLexer.Create(AOwner: TPaScintilla);
+begin
+  FOwner:=AOwner;
 end;
 
 initialization
