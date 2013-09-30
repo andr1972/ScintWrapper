@@ -10,6 +10,7 @@ type
   TForm1 = class(TForm)
     Scintilla1: TScintilla;
     Button1: TButton;
+    OpenDialog1: TOpenDialog;
     procedure Button1Click(Sender: TObject);
   private
   public
@@ -27,19 +28,24 @@ uses
 procedure TForm1.Button1Click(Sender: TObject);
 var
   stream: TMemoryStream;
+  ext: string;
 begin
-  stream:=TMemoryStream.Create;
-  //stream.LoadFromFile('d:\code\ScintWrapper\Pascal\Scintilla.pas');
-  stream.LoadFromFile('d:\Andrzej\scintilla\doc\Design.html');
-  //stream.LoadFromFile('d:\Andrzej\scintilla\src\Editor.cxx');
-  //stream.LoadFromFile('d:\Andrzej\scintilla\test\simpleTests.py');
-  //stream.LoadFromFile('d:\code\AsCommander.git\bin\AsCmd.yaml');
-  //stream.LoadFromFile('d:\code\arity-calculator\bin\AndroidManifest.xml');
-  Scintilla1.ClearAll;
-  Scintilla1.AddText(stream.Size, stream.Memory);
-  stream.Free;
-  //Scintilla1.LexerClass:=THtmlLexer;
-  Scintilla1.Fold;
+  if OpenDialog1.Execute then
+  begin
+    ext:= LowerCase(ExtractFileExt(OpenDialog1.FileName));
+    if ext='.html' then Scintilla1.LexerClass:=THtmlLexer
+    else if (ext='.pas')or(ext='.pp')or(ext='.inc') then Scintilla1.LexerClass:=TPasLexer
+    else if (ext='.c')or(ext='.cpp')or(ext='.cxx')or(ext='.h')or(ext='.hpp') then Scintilla1.LexerClass:=TCppLexer
+    else if ext='.py' then Scintilla1.LexerClass:=TPyLexer
+    else if (ext='.yaml')or(ext='.yml') then Scintilla1.LexerClass:=TYamlLexer
+    else if (ext='.xml') then Scintilla1.LexerClass:=TXmlLexer;
+    stream:=TMemoryStream.Create;
+    stream.LoadFromFile(OpenDialog1.FileName);
+    Scintilla1.ClearAll;
+    Scintilla1.AddText(stream.Size, stream.Memory);
+    stream.Free;
+    Scintilla1.Fold;
+  end;
 end;
 
 end.

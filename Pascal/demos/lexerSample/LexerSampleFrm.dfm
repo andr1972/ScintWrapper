@@ -33,4 +33,11 @@ object Form1: TForm1
     TabOrder = 1
     OnClick = Button1Click
   end
+  object OpenDialog1: TOpenDialog
+    Filter =
+      '*|*|html|*.html|pas|*.pas;*.pp;*inc|c/cpp|*.c;*.cpp;*.cxx;*.h;*.' +
+      'hpp|Python|*.py|Yaml|*.yaml;*.yml|Xml|*.xml'
+    Left = 216
+    Top = 344
+  end
 end
