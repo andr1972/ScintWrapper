@@ -3,7 +3,7 @@ program LexerSample;
 uses
   Forms,
   LexerSampleFrm in 'LexerSampleFrm.pas' {Form1},
-  HtmlLexer in '..\..\HtmlLexer.pas';
+  PasLexer in '..\..\PasLexer.pas';
 
 {$R *.res}
 

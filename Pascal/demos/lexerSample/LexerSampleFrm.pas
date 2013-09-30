@@ -20,7 +20,7 @@ var
 
 implementation
 uses
-  HtmlLexer;
+  HtmlLexer, PasLexer;
 
 {$R *.dfm}
 procedure TForm1.Button1Click(Sender: TObject);
@@ -28,6 +28,7 @@ var
   stream: TMemoryStream;
 begin
   stream:=TMemoryStream.Create;
+  //stream.LoadFromFile('d:\code\ScintWrapper\Pascal\Scintilla.pas');
   stream.LoadFromFile('d:\Andrzej\scintilla\doc\Design.html');
   Scintilla1.ClearAll;
   Scintilla1.AddText(stream.Size, stream.Memory);

@@ -15,7 +15,7 @@ uses
 {$ELSE}
   libc,
 {$ENDIF}
-  Classes, SysUtils, Controls, Messages;
+  Classes, SysUtils, Controls, Messages, Graphics;
 
 const
 {$ifdef MSWindows}
@@ -108,6 +108,7 @@ type
   TLexer = class
   protected
     FOwner: TScintilla;
+    procedure SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);
   public
     constructor Create(AOwner: TScintilla); virtual;
     procedure InitDefaults; virtual; abstract;
@@ -331,6 +332,8 @@ end;
 procedure TScintilla.Fold;
 begin
   SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold')), integer(PAnsiChar(AnsiString('1'))) );
+  SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.comment')), integer(PAnsiChar(AnsiString('1'))) );
+  SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.preprocessor')), integer(PAnsiChar(AnsiString('1'))) );
   SendEditor(SCI_SETMARGINWIDTHN, 1, 0);
   SendEditor(SCI_SETMARGINSENSITIVEN, 1, 1);
   SendEditor(SCI_SETMARGINTYPEN,  1, SC_MARGIN_SYMBOL);
@@ -364,6 +367,18 @@ constructor TLexer.Create(AOwner: TScintilla);
 begin
   FOwner:=AOwner;
 end;
+
+procedure TLexer.SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);
+begin
+  FOwner.SendEditor(SCI_STYLESETFORE, style, fore);
+  FOwner.SendEditor(SCI_STYLESETBACK, style, back);
+  if size >= 1 then
+          FOwner.SendEditor(SCI_STYLESETSIZE, style, size);
+  if face<>nil then
+          FOwner.SendEditor(SCI_STYLESETFONT, style, integer(face));
+end;
+
+
 
 initialization
 {$IFDEF FPC}

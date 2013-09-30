@@ -8,7 +8,6 @@ uses
 type
   THtmlLexer = class(TLexer)
   protected
-    procedure SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);
   public
     procedure InitDefaults; override;
   end;
@@ -64,16 +63,6 @@ const htmlKeyWords: PAnsiChar =
 	'boolean byte currency date double integer long object single string type '+
 	'variant';
 
-procedure THtmlLexer.SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);
-begin
-  FOwner.SendEditor(SCI_STYLESETFORE, style, fore);
-  FOwner.SendEditor(SCI_STYLESETBACK, style, back);
-  if size >= 1 then
-          FOwner.SendEditor(SCI_STYLESETSIZE, style, size);
-  if face<>nil then
-          FOwner.SendEditor(SCI_STYLESETFONT, style, integer(face));
-end;
-
 procedure THtmlLexer.InitDefaults;
 var
   red,offWhite,darkGreen,darkBlue,lightBlue: TColor;
@@ -88,16 +77,16 @@ begin
   FOwner.SendEditor(SCI_SETKEYWORDS, 1, integer(jsKeyWords));
   FOwner.SendEditor(SCI_SETKEYWORDS, 2, integer(vbsKeyWords));
   // Set up the global default style. These attributes are used wherever no explicit choices are made.
-  SetAStyle(STYLE_DEFAULT, clBlack, clWhite, 11, 'Verdana');
+  SetAStyle(STYLE_DEFAULT, clBlack, clWhite, 10, 'Courier New');
   FOwner.SendEditor(SCI_STYLECLEARALL);	// Copies global style to all others
 
-  red := TColor($FF0000);
-  offWhite := TColor($FFFBF0);
+  red := TColor($0000FF);
+  offWhite := TColor($D0E0E0);
   darkGreen := TColor($008000);
-  darkBlue := TColor($000080);
+  darkBlue := TColor($800000);
 
   // Hypertext default is used for all the document's text
-  SetAStyle(SCE_H_DEFAULT, clBlack, clWhite, 11, 'Times New Roman');
+  SetAStyle(SCE_H_DEFAULT, clBlack);
 
   // Unknown tags and attributes are highlighed in red.
   // If a tag is actually OK, it should be added in lower case to the htmlKeyWords string.
