@@ -1,1 +1,1 @@
-c:\lazarus\tools\lazres.exe PaScint.lrs TPaScintilla.png
+c:\lazarus\tools\lazres.exe Scint.lrs TScintilla.png

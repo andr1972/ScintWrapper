@@ -11,13 +11,13 @@ uses
   LCLIntf, LCLType, LMessages,
 {$ENDIF}
   Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, PaScintilla;
+  Dialogs, StdCtrls, Scintilla;
 
 type
   { TForm1 }
 
   TForm1 = class(TForm)
-    PaScintilla1: TPaScintilla;
+    Scintilla1: TScintilla;
     Button1: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -36,12 +36,12 @@ implementation
 
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  PaScintilla1.AddText('1234');
+  Scintilla1.AddText('1234');
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  PaScintilla1.AddText('abcd');
+  Scintilla1.AddText('abcd');
 end;
 
 end.

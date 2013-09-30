@@ -2,7 +2,7 @@
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
-    <Name Value="PaScint"/>
+    <Name Value="Scint"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
@@ -23,12 +23,12 @@
     </CompilerOptions>
     <Files Count="2">
       <Item1>
-        <Filename Value="PaScintilla.pas"/>
+        <Filename Value="Scintilla.pas"/>
         <HasRegisterProc Value="True"/>
-        <UnitName Value="PaScintilla"/>
+        <UnitName Value="Scintilla"/>
       </Item1>
       <Item2>
-        <Filename Value="PaScint.lrs"/>
+        <Filename Value="Scint.lrs"/>
         <Type Value="LRS"/>
       </Item2>
     </Files>

@@ -3,7 +3,7 @@ unit HtmlLexer;
 interface
 
 uses
-  Graphics, PaScintilla;
+  Graphics, Scintilla;
 
 type
   THtmlLexer = class(TLexer)

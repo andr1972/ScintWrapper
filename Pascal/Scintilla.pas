@@ -1,4 +1,4 @@
-unit PaScintilla;
+unit Scintilla;
 
 {$IFDEF FPC}
   {$MODE Delphi}
@@ -25,8 +25,8 @@ const
 {$endif}
 
 type
-  TPaScintillaFunction = function(APointer: Pointer; AMessage: Integer; WParam: Integer; LParam: Integer): Integer; cdecl;
-  TPaScintillaMethod = (smMessages, smDirect);
+  TScintillaFunction = function(APointer: Pointer; AMessage: Integer; WParam: Integer; LParam: Integer): Integer; cdecl;
+  TScintillaMethod = (smMessages, smDirect);
 
   TKeyMod = LongWord; //Key + (Mod << 16)
   TPosition = integer;
@@ -103,23 +103,23 @@ type
     updated: Integer;	              // SCN_UPDATEUI
   end;
 
-  TPaScintilla = class;
+  TScintilla = class;
 
   TLexer = class
   protected
-    FOwner: TPaScintilla;
+    FOwner: TScintilla;
   public
-    constructor Create(AOwner: TPaScintilla); virtual;
+    constructor Create(AOwner: TScintilla); virtual;
     procedure InitDefaults; virtual; abstract;
   end;
   TLexerClass = class of TLexer;
 
-  TPaScintilla = class(TWinControl)
+  TScintilla = class(TWinControl)
   private
     FSciDllHandle: HMODULE;
     FDirectPointer: Pointer;
-    FDirectFunction: TPaScintillaFunction;
-    FAccessMethod: TPaScintillaMethod;
+    FDirectFunction: TScintillaFunction;
+    FAccessMethod: TScintillaMethod;
     FLexer: TLexer;
     FLexerClass: TLexerClass;
     procedure LoadSciLibraryIfNeeded;
@@ -149,7 +149,7 @@ type
     procedure SetLexer(lexer: integer);
     procedure SetLexerLanguage(language: PAnsiChar);
   published
-    property AccessMethod: TPaScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
+    property AccessMethod: TScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
     property Lexer: TLexer read FLexer;
     property LexerClass: TLexerClass read FLexerClass write SetLexerClass;
   end;
@@ -163,9 +163,9 @@ uses
   Dialogs;
 
 
-{ TPaScintilla }
+{ TScintilla }
 
-constructor TPaScintilla.Create(AOwner: TComponent);
+constructor TScintilla.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FAccessMethod := smDirect;
@@ -174,14 +174,14 @@ begin
   HandleNeeded;
 end;
 
-destructor TPaScintilla.Destroy;
+destructor TScintilla.Destroy;
 begin
   inherited Destroy;
   FLexer.Free;
   FreeSciLibrary;
 end;
 
-procedure TPaScintilla.LoadSciLibraryIfNeeded;
+procedure TScintilla.LoadSciLibraryIfNeeded;
 begin
   if FSciDllHandle <> 0 then
     Exit;
@@ -194,7 +194,7 @@ begin
     RaiseLastOSError;
 end;
 
-procedure TPaScintilla.FreeSciLibrary;
+procedure TScintilla.FreeSciLibrary;
 begin
   if FSciDllHandle <> 0 then
     try
@@ -204,7 +204,7 @@ begin
     end;
 end;
 
-procedure TPaScintilla.CreateWnd;
+procedure TScintilla.CreateWnd;
 begin
   // Load Scintilla if not loaded already.
   // Library must be loaded before subclassing/creating window
@@ -212,23 +212,23 @@ begin
   inherited CreateWnd;
 end;
 
-procedure TPaScintilla.CreateParams(var Params: TCreateParams);
+procedure TScintilla.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
   // Subclass Scintilla - WND Class was registred at DLL load proc
   CreateSubClass(Params, 'SCINTILLA');
 end;
 
-procedure TPaScintilla.WMCreate(var AMessage: TWMCreate);
+procedure TScintilla.WMCreate(var AMessage: TWMCreate);
 begin
   inherited;
-  FDirectFunction := TPaScintillaFunction(Windows.SendMessage(
+  FDirectFunction := TScintillaFunction(Windows.SendMessage(
     WindowHandle, SCI_GETDIRECTFUNCTION, 0, 0));
   FDirectPointer := Pointer(Windows.SendMessage(
     WindowHandle, SCI_GETDIRECTPOINTER, 0, 0));
 end;
 
-procedure TPaScintilla.WMDestroy(var AMessage: TWMDestroy);
+procedure TScintilla.WMDestroy(var AMessage: TWMDestroy);
 begin
   inherited;
   // No longer valid after window destory
@@ -236,7 +236,7 @@ begin
   FDirectPointer := nil;
 end;
 
-procedure TPaScintilla.WMEraseBkgnd(var AMessage: TWmEraseBkgnd);
+procedure TScintilla.WMEraseBkgnd(var AMessage: TWmEraseBkgnd);
 begin
   if csDesigning in ComponentState then
     inherited
@@ -245,7 +245,7 @@ begin
     AMessage.Result := 0;
 end;
 
-procedure TPaScintilla.WMGetDlgCode(var AMessage: TWMGetDlgCode);
+procedure TScintilla.WMGetDlgCode(var AMessage: TWMGetDlgCode);
 begin
   inherited;
   // Allow key-codes like Enter, Tab, Arrows, and other to be passed to Scintilla
@@ -256,10 +256,10 @@ end;
 
 procedure Register;
 begin
-  RegisterComponents('PaScintilla', [TPaScintilla]);
+  RegisterComponents('Scintilla', [TScintilla]);
 end;
 
-procedure TPaScintilla.MarginClick(nmhdr: PNMHdr);
+procedure TScintilla.MarginClick(nmhdr: PNMHdr);
 var
   notify: PSciSCNotification;
   line_number: integer;
@@ -274,7 +274,7 @@ begin
   end;
 end;
 
-procedure TPaScintilla.CNNotify(var AMessage: TWMNotify);
+procedure TScintilla.CNNotify(var AMessage: TWMNotify);
 begin
   if HandleAllocated and (AMessage.NMHdr^.hwndFrom = Self.Handle) then
   begin
@@ -284,7 +284,7 @@ begin
     inherited;
 end;
 
-function TPaScintilla.SendEditor(AMessage, WParam,
+function TScintilla.SendEditor(AMessage, WParam,
   LParam: Integer): Integer;
 begin
   if (FAccessMethod = smMessages) then
@@ -293,42 +293,42 @@ begin
     Result := FDirectFunction(FDirectPointer, AMessage, WParam, LParam);
 end;
 
-procedure TPaScintilla.AddText(ALength: integer; AText: PAnsiChar);
+procedure TScintilla.AddText(ALength: integer; AText: PAnsiChar);
 begin
   SendEditor(SCI_ADDTEXT, ALength, integer(AText));
 end;
 
-procedure TPaScintilla.AddText(const AText: AnsiString);
+procedure TScintilla.AddText(const AText: AnsiString);
 begin
   SendEditor(SCI_ADDTEXT, Length(AText), integer(PAnsiChar(AText)));
 end;
 
-procedure TPaScintilla.ClearAll;
+procedure TScintilla.ClearAll;
 begin
   SendEditor(SCI_CLEARALL);
 end;
 
-function TPaScintilla.GetLength: integer;
+function TScintilla.GetLength: integer;
 begin
   result:=SendEditor(SCI_GETLENGTH);
 end;
 
-procedure TPaScintilla.SetWrapMode(Wrap: SC_WRAP);
+procedure TScintilla.SetWrapMode(Wrap: SC_WRAP);
 begin
   SendEditor(SCI_SETWRAPMODE, integer(Wrap));
 end;
 
-procedure TPaScintilla.SetLexer(lexer: integer);
+procedure TScintilla.SetLexer(lexer: integer);
 begin
   SendEditor(SCI_SETLEXER, lexer);
 end;
 
-procedure TPaScintilla.SetLexerLanguage(language: PAnsiChar);
+procedure TScintilla.SetLexerLanguage(language: PAnsiChar);
 begin
   SendEditor(SCI_SETLEXERLANGUAGE, 0, integer(language));
 end;
 
-procedure TPaScintilla.Fold;
+procedure TScintilla.Fold;
 begin
   SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold')), integer(PAnsiChar(AnsiString('1'))) );
   SendEditor(SCI_SETMARGINWIDTHN, 1, 0);
@@ -347,7 +347,7 @@ begin
   SendEditor(SCI_SETMARGINCURSORN, 1, 0);
 end;
 
-procedure TPaScintilla.SetLexerClass(const Value: TLexerClass);
+procedure TScintilla.SetLexerClass(const Value: TLexerClass);
 begin
   if Value<>FLexerClass then
   begin
@@ -360,13 +360,13 @@ end;
 
 { TLexer }
 
-constructor TLexer.Create(AOwner: TPaScintilla);
+constructor TLexer.Create(AOwner: TScintilla);
 begin
   FOwner:=AOwner;
 end;
 
 initialization
 {$IFDEF FPC}
-  {$I PaScint.lrs}
+  {$I Scint.lrs}
 {$ENDIF}
 end.

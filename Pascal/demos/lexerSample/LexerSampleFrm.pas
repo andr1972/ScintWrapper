@@ -4,11 +4,11 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, PaScintilla;
+  Dialogs, StdCtrls, Scintilla;
 
 type
   TForm1 = class(TForm)
-    PaScintilla1: TPaScintilla;
+    Scintilla1: TScintilla;
     Button1: TButton;
     procedure Button1Click(Sender: TObject);
   private
@@ -29,11 +29,11 @@ var
 begin
   stream:=TMemoryStream.Create;
   stream.LoadFromFile('d:\Andrzej\scintilla\doc\Design.html');
-  PaScintilla1.ClearAll;
-  PaScintilla1.AddText(stream.Size, stream.Memory);
+  Scintilla1.ClearAll;
+  Scintilla1.AddText(stream.Size, stream.Memory);
   stream.Free;
-  PaScintilla1.LexerClass:=THtmlLexer;
-  PaScintilla1.Fold;
+  Scintilla1.LexerClass:=THtmlLexer;
+  Scintilla1.Fold;
 end;
 
 end.

@@ -2,20 +2,20 @@
   This source is only used to compile and install the package.
  }
 
-unit PaScint;
+unit Scint;
 
 interface
 
 uses
-  PaScintilla, LazarusPackageIntf;
+  Scintilla, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
-  RegisterUnit('PaScintilla', @PaScintilla.Register);
+  RegisterUnit('Scintilla', @Scintilla.Register);
 end;
 
 initialization
-  RegisterPackage('PaScint', @Register);
+  RegisterPackage('Scint', @Register);
 end.

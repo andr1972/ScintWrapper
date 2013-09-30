@@ -14,7 +14,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object PaScintilla1: TPaScintilla
+  object Scintilla1: TScintilla
     Left = 8
     Top = 16
     Width = 320
