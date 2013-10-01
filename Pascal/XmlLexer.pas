@@ -8,11 +8,35 @@ uses
 type
   TXmlLexer = class(TLexer)
   protected
+    function getSampleLines: AnsiString; override;
   public
     procedure InitDefaults; override;
   end;
 
 implementation
+const
+  sampleLines: AnsiString =
+  '<?xml version="1.0" encoding="UTF-8"?>'#10+
+  '<project name="StartupActivity">'#10+
+  #10+
+  '    <!-- The local.properties file is created and updated by the ''android'' tool.'#10+
+  '         It contains the path to the SDK. It should *NOT* be checked in in Version'#10+
+  '         Control Systems. -->'#10+
+  '    <property file="local.properties" />'#10+
+  '    <property file="build.properties" />'#10+
+  '    <path id="android.antlibs">'#10+
+  '        <pathelement path="${sdk.dir}/tools/lib/anttasks.jar" />'#10+
+  '        <pathelement path="${sdk.dir}/tools/lib/sdklib.jar" />'#10+
+  '        <pathelement path="${sdk.dir}/tools/lib/androidprefs.jar" />'#10+
+  '        <pathelement path="${sdk.dir}/tools/lib/apkbuilder.jar" />'#10+
+  '        <pathelement path="${sdk.dir}/tools/lib/jarutils.jar" />'#10+
+  '    </path>'#10+
+  '</project>';
+
+function TXmlLexer.getSampleLines: AnsiString;
+begin
+  result:=sampleLines;
+end;
 
 procedure TXmlLexer.InitDefaults;
 var
@@ -37,7 +61,8 @@ begin
   SetAStyle(SCE_H_ATTRIBUTE, darkGreen);
   SetAStyle(SCE_H_DOUBLESTRING, clFuchsia);
   SetAStyle(SCE_H_SINGLESTRING, clFuchsia);
-  SetAStyle(SCE_H_CDATA, clYellow offWhite);
+  SetAStyle(SCE_H_CDATA, clRed, offWhite);
+  SetAStyle(SCE_H_COMMENT, TColor($808000));
   FOwner.SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.html')), integer(PAnsiChar(AnsiString('1'))) );
 end;
 

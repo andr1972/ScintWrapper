@@ -109,9 +109,11 @@ type
   protected
     FOwner: TScintilla;
     procedure SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);
+    function getSampleLines: AnsiString; virtual; abstract;
   public
     constructor Create(AOwner: TScintilla); virtual;
     procedure InitDefaults; virtual; abstract;
+    procedure Sample;
   end;
   TLexerClass = class of TLexer;
 
@@ -142,10 +144,10 @@ type
     procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure InitDefaults;
     procedure AddText(ALength: integer; AText: PAnsiChar); overload;
     procedure AddText(const AText: AnsiString); overload;
     procedure ClearAll;
+    procedure ClearDocumentStyle;
     function GetLength: integer;
     procedure SetWrapMode(Wrap: SC_WRAP);
     procedure SetLexer(lexer: integer);
@@ -176,7 +178,6 @@ begin
   Width := 320;
   Height := 240;
   HandleNeeded;
-  InitDefaults;
 end;
 
 destructor TScintilla.Destroy;
@@ -184,14 +185,6 @@ begin
   inherited Destroy;
   FLexer.Free;
   FreeSciLibrary;
-end;
-
-procedure TScintilla.InitDefaults;
-begin
-  SendEditor(SCI_STYLESETFORE, STYLE_DEFAULT, clBlack);
-  SendEditor(SCI_STYLESETBACK, STYLE_DEFAULT, clWhite);
-  SendEditor(SCI_STYLESETSIZE, STYLE_DEFAULT, 10);
-  SendEditor(SCI_STYLESETFONT, STYLE_DEFAULT, integer(PAnsiChar('Courier New')));
 end;
 
 procedure TScintilla.LoadSciLibraryIfNeeded;
@@ -373,11 +366,24 @@ begin
   end;
 end;
 
+procedure TScintilla.ClearDocumentStyle;
+begin
+  SendEditor(SCI_ClearDocumentStyle);
+end;
+
 { TLexer }
 
 constructor TLexer.Create(AOwner: TScintilla);
 begin
   FOwner:=AOwner;
+end;
+
+procedure TLexer.Sample;
+begin
+  FOwner.ClearAll;
+  FOwner.AddText(getSampleLines());
+  InitDefaults;
+  FOwner.Fold;
 end;
 
 procedure TLexer.SetAStyle(style: integer; fore: TColor; back: TColor=clWhite; size: integer=-1; face: PAnsiChar=nil);

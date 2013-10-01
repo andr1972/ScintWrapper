@@ -8,13 +8,35 @@ uses
 type
   TPyLexer = class(TLexer)
   protected
+    function getSampleLines: AnsiString; override;
   public
     procedure InitDefaults; override;
   end;
 
 implementation
 
-{ TPasLexer }
+const
+  sampleLines: AnsiString =
+'import itertools'#10+
+#10+
+'def iter_primes():'#10+
+'     # an iterator of all numbers between 2 and +infinity'#10+
+'     numbers = itertools.count(2)'#10+
+#10+
+'     # generate primes forever'#10+
+'     while True:'#10+
+'         # get the first number from the iterator (always a prime)'#10+
+'         prime = numbers.next()'#10+
+'         yield prime'#10+
+#10+
+'         # this code iteratively builds up a chain of'#10+
+'         # filters...slightly tricky, but ponder it a bit'#10+
+'         numbers = itertools.ifilter(prime.__rmod__, numbers)'#10+
+#10+
+'for p in iter_primes():'#10+
+'    if p > 1000:'#10+
+'        break'#10+
+'    print p';
 
 const pyKeyWords: PAnsiChar =
     'and assert break class continue def '+
@@ -22,6 +44,11 @@ const pyKeyWords: PAnsiChar =
     'from global if import in is lambda '+
     'not or pass print raise return try '+
     'while yield';
+
+function TPyLexer.getSampleLines: AnsiString;
+begin
+  result:=sampleLines;
+end;
 
 procedure TPyLexer.InitDefaults;
 var

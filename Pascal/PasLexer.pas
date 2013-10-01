@@ -8,13 +8,34 @@ uses
 type
   TPasLexer = class(TLexer)
   protected
+    function getSampleLines: AnsiString; override;
   public
     procedure InitDefaults; override;
   end;
 
 implementation
 
-{ TPasLexer }
+const
+  sampleLines: AnsiString =
+  '{ Comment'#10+
+  '  Second comment line }'#10+
+  '{$R- compiler directive}'#10+
+  'procedure TForm1.Button1Click(Sender: TObject);'#10+
+  'var  // Line comment'#10+
+  '  Number, I, X: Integer;'#10+
+  'begin'#10+
+  '  Number := 12345 * (2 + 9);'#10+
+  '  Caption := ''The number is '' + IntToStr(Number);'#10+
+  '  asm'#10+
+  '    MOV AX,1234h'#10+
+  '    MOV Number, AX'#10+
+  '  end;'#10+
+  '  X := 10;'#10+
+  '  inc(X); {$R+}'#10+
+  '  (*'#10+
+  '  Comment'#10+
+  '  *)'#10+
+  'end;';
 
 const pasKeyWords: PAnsiChar =
     'absolute abstract and array as asm assembler '+
@@ -33,6 +54,11 @@ const pasKeyWords: PAnsiChar =
     'safecall sealed set shl shr stdcall stored string '+
     'stringresource then threadvar to try type unit until '+
     'uses var virtual while with write writeonly xor';
+
+function TPasLexer.getSampleLines: AnsiString;
+begin
+  result:=sampleLines;
+end;
 
 procedure TPasLexer.InitDefaults;
 var

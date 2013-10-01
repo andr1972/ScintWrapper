@@ -4,15 +4,19 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Scintilla;
+  Dialogs, StdCtrls, Scintilla, AdaLexer;
 
 type
   TForm1 = class(TForm)
     Scintilla1: TScintilla;
     Button1: TButton;
     OpenDialog1: TOpenDialog;
+    ComboBox: TComboBox;
     procedure Button1Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure ComboBoxChange(Sender: TObject);
   private
+    procedure InitCombo;
   public
   end;
 
@@ -21,8 +25,9 @@ var
 
 implementation
 uses
-  HtmlLexer, PasLexer, CppLexer, PyLexer, YamlLexer,
-  XmlLexer;
+  DefaultLexer, HtmlLexer, PasLexer, CppLexer, PyLexer, YamlLexer,
+  XmlLexer, SqlLexer, PerlLexer, VBLexer, PropertiesLexer, MakefileLexer,
+  BatchLexer, LatexLexer, LuaLexer, DiffLexer, ConfLexer;
 
 {$R *.dfm}
 procedure TForm1.Button1Click(Sender: TObject);
@@ -46,6 +51,44 @@ begin
     stream.Free;
     Scintilla1.Fold;
   end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  InitCombo;
+end;
+
+procedure TForm1.InitCombo;
+ procedure Add(const S: string; AType: TLexerClass);
+ begin
+   ComboBox.Items.AddObject(S, TObject(AType));
+ end;
+begin
+  Add('Default',TDefaultLexer);
+  Add('Pascal',TPasLexer);
+  Add('XML',TXmlLexer);
+  Add('HTML',THtmlLexer);
+  Add('C++',TCppLexer);
+  Add('Python',TPyLexer);
+  Add('Yaml',TYamlLexer);
+  Add('SQL',TSqlLexer);
+  Add('Perl',TPerlLexer);
+  Add('VB',TVBLexer);
+  Add('Properties',TPropertiesLexer);
+  Add('Makefile',TMakefileLexer);
+  Add('Batch',TBatchLexer);
+  Add('Latex',TLatexLexer);
+  Add('Lua',TLuaLexer);
+  Add('Diff',TDiffLexer);
+  Add('Conf',TConfLexer);
+  Add('Ada',TAdaLexer);
+end;
+
+procedure TForm1.ComboBoxChange(Sender: TObject);
+begin
+  with (Sender as TComboBox) do
+    Scintilla1.LexerClass:=TLexerClass(Items.Objects[ItemIndex]);
+  Scintilla1.Lexer.Sample;
 end;
 
 end.

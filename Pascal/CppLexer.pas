@@ -8,13 +8,28 @@ uses
 type
   TCppLexer = class(TLexer)
   protected
+    function getSampleLines: AnsiString; override;
   public
     procedure InitDefaults; override;
   end;
 
 implementation
 
-{ TPasLexer }
+const
+  sampleLines: AnsiString =
+'#include <iostream>'#10+
+'using namespace std;'#10+
+#10+
+'int main()'#10+
+'{'#10+
+'    std::cout << "Hello world of C++!!!\n";'#10+
+'    for (int i=0; i<2;i++)'#10+
+'    {'#10+
+'	std::cout << i;'#10+
+'	std::cout << i * 2;'#10+
+'    }'#10+
+'    return 0;'#10+
+'}';
 
 const cppKeyWords: PAnsiChar =
     '__asm __automated __cdecl __classid __closure __declspec '+
@@ -31,6 +46,11 @@ const cppKeyWords: PAnsiChar =
     'sizeof static static_cast struct switch template this '+
     'throw true try typedef typeid typename union '+
     'unsigned using virtual void volatile wchar_t while';
+
+function TCppLexer.getSampleLines: AnsiString;
+begin
+  result:=sampleLines;
+end;
 
 procedure TCppLexer.InitDefaults;
 var

@@ -3,7 +3,14 @@ program LexerSample;
 uses
   Forms,
   LexerSampleFrm in 'LexerSampleFrm.pas' {Form1},
-  XmlLexer in '..\..\XmlLexer.pas';
+  XmlLexer in '..\..\XmlLexer.pas',
+  LatexLexer in '..\..\LatexLexer.pas',
+  DefaultLexer in '..\..\DefaultLexer.pas',
+  HtmlLexer in '..\..\HtmlLexer.pas',
+  PropertiesLexer in '..\..\PropertiesLexer.pas',
+  BatchLexer in '..\..\BatchLexer.pas',
+  AdaLexer in '..\..\AdaLexer.pas',
+  MakefileLexer in '..\..\MakefileLexer.pas';
 
 {$R *.res}
 

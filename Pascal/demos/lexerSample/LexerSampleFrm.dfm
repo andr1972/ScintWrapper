@@ -11,6 +11,7 @@ object Form1: TForm1
   Font.Name = 'MS Sans Serif'
   Font.Style = []
   OldCreateOrder = False
+  OnCreate = FormCreate
   DesignSize = (
     475
     390)
@@ -33,8 +34,18 @@ object Form1: TForm1
     TabOrder = 1
     OnClick = Button1Click
   end
+  object ComboBox: TComboBox
+    Left = 24
+    Top = 352
+    Width = 145
+    Height = 21
+    Anchors = [akLeft, akBottom]
+    ItemHeight = 13
+    TabOrder = 2
+    OnChange = ComboBoxChange
+  end
   object OpenDialog1: TOpenDialog
-    Filter =
+    Filter = 
       '*|*|html|*.html|pas|*.pas;*.pp;*inc|c/cpp|*.c;*.cpp;*.cxx;*.h;*.' +
       'hpp|Python|*.py|Yaml|*.yaml;*.yml|Xml|*.xml'
     Left = 216

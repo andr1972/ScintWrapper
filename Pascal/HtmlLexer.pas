@@ -8,13 +8,33 @@ uses
 type
   THtmlLexer = class(TLexer)
   protected
+    function getSampleLines: AnsiString; override;
   public
     procedure InitDefaults; override;
   end;
 
 implementation
 
-{ THtmlLexer }
+const
+  sampleLines: AnsiString =
+'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"'#10+
+'"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'#10+
+'<html xmlns="http://www.w3.org/1999/xhtml">'#10+
+'<head>'#10+
+'<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />'#10+
+'<title>JavaScript Function</title>'#10+
+'<script language="javascript" type="text/javascript">'#10+
+'<!--'#10+
+'function demoFunction() {'#10+
+'document.write("Hello");'#10+
+'}'#10+
+'-->'#10+
+'</script>'#10+
+'</head>'#10+
+'<body>'#10+
+'<script language="javascript" type="text/javascript">demoFunction();</script>'#10+
+'</body>'#10+
+'</html>';
 
 const htmlKeyWords: PAnsiChar =
 	'a abbr acronym address applet area b base basefont '+
@@ -63,6 +83,11 @@ const htmlKeyWords: PAnsiChar =
 	'boolean byte currency date double integer long object single string type '+
 	'variant';
 
+function THtmlLexer.getSampleLines: AnsiString;
+begin
+  result:=sampleLines;
+end;
+
 procedure THtmlLexer.InitDefaults;
 var
   red,offWhite,darkGreen,darkBlue,lightBlue: TColor;
@@ -96,7 +121,11 @@ begin
   SetAStyle(SCE_H_SINGLESTRING, clFuchsia);
   SetAStyle(SCE_H_CDATA, clYellow offWhite);
   SetAStyle(SCE_H_NUMBER, TColor($800080));
-  SetAStyle(SCE_H_COMMENT, TColor($008080));
+  SetAStyle(SCE_H_COMMENT, TColor($808000));
+  FOwner.SendEditor(SCI_STYLESETBOLD, SCE_HJ_KEYWORD, 1);
+  SetAStyle(SCE_HJ_DOUBLESTRING, clFuchsia);
+  SetAStyle(SCE_HJ_SINGLESTRING, clFuchsia);
+  SetAStyle(SCE_HJ_NUMBER, darkGreen);
   FOwner.SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold.html')), integer(PAnsiChar(AnsiString('1'))) );
 end;
 
