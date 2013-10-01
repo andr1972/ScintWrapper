@@ -27,7 +27,7 @@ implementation
 uses
   DefaultLexer, HtmlLexer, PasLexer, CppLexer, PyLexer, YamlLexer,
   XmlLexer, SqlLexer, PerlLexer, VBLexer, PropertiesLexer, MakefileLexer,
-  BatchLexer, LatexLexer, LuaLexer, DiffLexer, ConfLexer, LispLexer;
+  BatchLexer, LatexLexer, LuaLexer, DiffLexer, ConfLexer, LispLexer, AsmLexer;
 
 {$R *.dfm}
 procedure TForm1.Button1Click(Sender: TObject);
@@ -84,6 +84,7 @@ begin
   Add('Ada',TAdaLexer);
   Add('Lisp',TLispLexer);
   Add('Eiffel',TEiffelLexer);
+  Add('Asm',TAsmLexer);
 end;
 
 procedure TForm1.ComboBoxChange(Sender: TObject);
