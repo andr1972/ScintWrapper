@@ -1,4 +1,3 @@
-//Apache Configuration Files Lexer
 unit AdaLexer;
 
 interface

@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Scintilla, AdaLexer;
+  Dialogs, StdCtrls, Scintilla, AdaLexer, EiffelLexer;
 
 type
   TForm1 = class(TForm)
@@ -27,7 +27,7 @@ implementation
 uses
   DefaultLexer, HtmlLexer, PasLexer, CppLexer, PyLexer, YamlLexer,
   XmlLexer, SqlLexer, PerlLexer, VBLexer, PropertiesLexer, MakefileLexer,
-  BatchLexer, LatexLexer, LuaLexer, DiffLexer, ConfLexer;
+  BatchLexer, LatexLexer, LuaLexer, DiffLexer, ConfLexer, LispLexer;
 
 {$R *.dfm}
 procedure TForm1.Button1Click(Sender: TObject);
@@ -82,6 +82,8 @@ begin
   Add('Diff',TDiffLexer);
   Add('Conf',TConfLexer);
   Add('Ada',TAdaLexer);
+  Add('Lisp',TLispLexer);
+  Add('Eiffel',TEiffelLexer);
 end;
 
 procedure TForm1.ComboBoxChange(Sender: TObject);
