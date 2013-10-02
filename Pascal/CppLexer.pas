@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString =
 '#include <iostream>'#10+

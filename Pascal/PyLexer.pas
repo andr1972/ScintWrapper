@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString =
 'import itertools'#10+

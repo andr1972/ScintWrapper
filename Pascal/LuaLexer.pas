@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //http://www.lua.org/pil/13.1.html
 'Set = {}'#10+

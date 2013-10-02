@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //http://docs.eiffel.com/book/examples/example-command-line-arguments
 'class'#10+

@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //http://sandbox.mc.edu/~bennet/ada/examples/gnatioex_adb.html
 '-- This is one of the examples shipped with GNAT.'#10+

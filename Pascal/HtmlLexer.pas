@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString =
 '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"'#10+

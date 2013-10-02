@@ -1,4 +1,5 @@
-*.gen
+LexConsts.pas
+consts.inc
 
 lib
 backup

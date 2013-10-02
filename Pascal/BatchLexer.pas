@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString = //https://en.wikipedia.org/wiki/Batch_file
 '@echo off'#10+

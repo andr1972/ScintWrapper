@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString = //http://www.vbtutor.net/VB_Sample/picviewer.htm
 'Private Sub Combo1_Change()'#10+

@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //edits from http://forrest.psych.unc.edu/teaching/p285/p285pgmexmpchap3.html
 ';One way of doing comments (line comments)'#10+

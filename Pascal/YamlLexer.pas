@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString =
 'receipt:     Oz-Ware Purchase Invoice'#10+

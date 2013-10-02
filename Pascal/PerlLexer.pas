@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString = //http://accad.osu.edu/~mlewis/Class/Perl/perl.html
 '#!/usr/local/bin/perl'#10+

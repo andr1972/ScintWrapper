@@ -15,6 +15,9 @@ type
 
 implementation
 
+uses
+  LexConsts;
+
 const
   sampleLines: AnsiString =
 '\documentclass[final,letterpaper,twoside,12pt]{article}'#10+

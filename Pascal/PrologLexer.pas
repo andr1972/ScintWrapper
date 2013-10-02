@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //http://www.cs.toronto.edu/~hojjat/384w09/simple-prolog-examples.html
 '% move(N,X,Y,Z) - move N disks from peg X to peg Y, with peg Z being the'#10+

@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //http://www.chemie.fu-berlin.de/chemnet/use/info/diff/diff_3.html
 '*** lao	Sat Jan 26 23:30:39 1991'#10+

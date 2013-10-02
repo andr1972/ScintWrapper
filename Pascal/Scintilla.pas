@@ -62,10 +62,6 @@ type
     chrg: TSciCharacterRange;         // Range of characters to print
   end;
 
-  SC_WRAP = ( SC_WRAP_NONE=0,
-              SC_WRAP_WORD=1,
-              SC_WRAP_CHAR=2);
-
   type
   TSciNotifyHeader = TNMHdr;
 
@@ -156,7 +152,7 @@ type
     procedure ClearAll;
     procedure ClearDocumentStyle;
     function GetLength: integer;
-    procedure SetWrapMode(Wrap: SC_WRAP);
+    procedure SetWrapMode(Wrap: integer);
     procedure SetLexer(lexer: integer);
     procedure SetLexerLanguage(language: PAnsiChar);
   published
@@ -169,7 +165,7 @@ type
 
   procedure Register;
 
-  {$I pas.gen}
+{$I consts.inc}
 implementation
 
 uses
@@ -378,9 +374,9 @@ begin
   result:=SendEditor(SCI_GETLENGTH);
 end;
 
-procedure TScintilla.SetWrapMode(Wrap: SC_WRAP);
+procedure TScintilla.SetWrapMode(Wrap: integer);
 begin
-  SendEditor(SCI_SETWRAPMODE, integer(Wrap));
+  SendEditor(SCI_SETWRAPMODE, Wrap);
 end;
 
 procedure TScintilla.SetLexer(lexer: integer);

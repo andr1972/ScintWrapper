@@ -15,6 +15,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //edited from http://www.pantz.org/software/apache/apache13config.html
 '# ServerType is either inetd, or standalone.  Inetd mode is only supported on'#10+

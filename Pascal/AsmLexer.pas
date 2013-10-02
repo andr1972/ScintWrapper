@@ -14,6 +14,9 @@ type
   end;
 
 implementation
+
+uses
+  LexConsts;
 const
   sampleLines: AnsiString = //edited from http://assembly.happycodings.com/code1.html
  'main:'#10+
