@@ -177,7 +177,7 @@ begin
   FAccessMethod := smDirect;
   Width := 320;
   Height := 240;
-  HandleNeeded;
+  if not(csDesigning in ComponentState) then HandleNeeded;
 end;
 
 destructor TScintilla.Destroy;
