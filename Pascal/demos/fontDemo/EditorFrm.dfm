@@ -24,16 +24,16 @@ object EditorForm: TEditorForm
   object MainMenu1: TMainMenu
     Left = 112
     Top = 8
-    object miFont: TMenuItem
-      Caption = 'Font'
-      OnClick = miFontClick
-    end
     object Unicode1: TMenuItem
       Caption = 'Unicode'
       object Read1: TMenuItem
         Caption = 'Read'
         OnClick = Read1Click
       end
+    end
+    object miFont: TMenuItem
+      Caption = 'Font'
+      OnClick = miFontClick
     end
   end
 end

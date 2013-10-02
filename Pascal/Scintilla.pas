@@ -191,7 +191,7 @@ begin
     SendEditor(SCI_SetKeysUnicode, 1);
     SendEditor(SCI_STYLESETFORE, STYLE_DEFAULT, clBlack);
     SendEditor(SCI_STYLESETBACK, STYLE_DEFAULT, clWhite);
-//    SendEditor(SCI_STYLESETSIZE, STYLE_DEFAULT, 10);
+    SendEditor(SCI_STYLESETSIZE, STYLE_DEFAULT, 10);
   end;
 end;
 
@@ -359,12 +359,11 @@ var
   len: integer;
 begin
   len:=StyleGetFont(AStyle, nil);
-  if len<=0 then raise Exception.Create('StyleGetFont returns 0');
-  {if len=1 then
+  if len=0 then
   begin
     result:='';
     exit;
-  end;}
+  end;
   SetLength(result, len);
   StyleGetFont(AStyle,PAnsiChar(result));
 end;

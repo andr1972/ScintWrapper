@@ -1,0 +1,23 @@
+GetCurLine
+StyleGetFont
+GetWordChars
+GetLine
+GetSelText
+GetText zero
+GetTag
+GetWhitespaceChars
+GetPunctuationChars
+AutoCGetCurrentText
+TargetAsUTF8
+EncodedFromUTF8
+MarginGetText
+MarginGetStyles
+AnnotationGetText
+AnnotationGetStyles
+GetRepresentation
+GetProperty
+GetPropertyExpanded
+GetLexerLanguage
+PropertyNames
+DescribeProperty
+DescribeKeyWordSets

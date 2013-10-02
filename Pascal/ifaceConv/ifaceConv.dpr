@@ -123,7 +123,7 @@ procedure dump_types;
 var
   f: TextFile;
   line: string;
-  type_,key,name,num,str: string;
+  type_,key,funname,name,num,str: string;
   lexer: TMiniLexer;
 begin
   AssignFile(f,'Scintilla.iface');
@@ -140,7 +140,7 @@ begin
     if (key='fun')or(key='get')or(key='set')or(key='evt') then
     begin
       type_:=lexer.NextToken; //type
-      name:=lexer.NextToken;
+      funname:=lexer.NextToken;
       lexer.NextToken; //=
       num:=lexer.NextToken;
       writeln(type_);
@@ -151,6 +151,7 @@ begin
         if type_=',' then continue;
         if type_=')' then break;
         writeln(type_);
+        //if type_='stringresult' then writeln(funname);
         name:=lexer.NextToken;
         if name=',' then continue;
         if name=')' then break;
