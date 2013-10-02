@@ -9,7 +9,7 @@ uses
   HtmlLexer in '..\..\HtmlLexer.pas',
   PropertiesLexer in '..\..\PropertiesLexer.pas',
   BatchLexer in '..\..\BatchLexer.pas',
-  AsmLexer in '..\..\AsmLexer.pas',
+  PrologLexer in '..\..\PrologLexer.pas',
   MakefileLexer in '..\..\MakefileLexer.pas';
 
 {$R *.res}
