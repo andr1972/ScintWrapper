@@ -3,7 +3,8 @@ program ifaceConv;
 
 uses
   SysUtils,
-  nHash;
+  nHash,
+  Classes;
 
 type
   TMiniLexer = class
@@ -58,6 +59,20 @@ begin
   while (Tail^ in[#1..' ']) do inc(Tail);//white chars without #0
   FPos:=Tail-FPtr;
 end;
+
+type
+//if function parameter type stringresult return with zero at end?
+  TStringResultZ = class
+  private
+    listZ: TStringList;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function ifReturnsZ(funName: string): boolean;
+  end;
+
+var
+  srz: TStringResultZ;
 
 procedure createH(filename: string);
 var
@@ -208,11 +223,15 @@ var
   outF: TextFile;
   lexUnitF: TextFile;
   line: string;
-  key,funtype,name,num,paramType,paramName,otherStr: string;
+  key,funtype,name,num,otherStr: string;
+  paramTypes,paramNames: TStringList;
   lexer: TMiniLexer;
   partLexers: boolean;
   typeMap: THashTableSS;
-  paramCnt: integer;
+  msgCnt,paramCnt: integer;
+  bStringResult: boolean;
+  deklStr: string;
+  i:integer;
 begin
   typeMap:=THashTableSS.Create(16);
   loadTypemap('typemapPas.dat',typeMap);
@@ -224,6 +243,8 @@ begin
   writeln(outF, 'const');
   lexer:=TMiniLexer.Create;
   partLexers:=false;
+  paramTypes:=TStringList.Create;
+  paramNames:=TStringList.Create;
   while not eof(f) do
   begin
     readln(f, line);
@@ -267,35 +288,73 @@ begin
     begin
       funtype:=lexer.NextToken;
       if funtype='void' then
-        write('procedure ')
+        deklStr:='procedure '
       else
-        write('function ');
+        deklStr:='function ';
       name:=lexer.NextToken;
-      write(name,'(');
+      deklStr:=deklStr+name+'(';
       lexer.NextToken; //=
       num:=Hex2Pas(lexer.NextToken);
       writeln(outF, '  SCI_',name,' = ',num,';');
       otherStr:=lexer.NextToken;
       Assert(otherStr='(');
+      msgCnt:=0;
       paramCnt:=0;
+      bStringResult:=false;
+      paramTypes.Clear;
+      paramNames.Clear;
       repeat
-        paramType:=lexer.NextToken;
-        if paramType=',' then continue;
-        if paramType=')' then break;
-        paramName:=lexer.NextToken;
-        Assert(paramName<>',');
-        Assert(paramName<>')');
+        otherStr:=lexer.NextToken;
+        inc(msgCnt);
+        if otherStr=',' then
+        begin
+          paramTypes.Add('');
+          paramNames.Add('');
+          continue;
+        end;
+        if otherStr=')' then break;
+        paramTypes.Add(otherStr);
+        otherStr:=lexer.NextToken;
+        Assert(otherStr<>',');
+        Assert(otherStr<>')');
+        paramNames.Add(otherStr);
         inc(paramCnt);
-        if paramCnt>1 then write('; ');
-        write(paramName,': ',typeMap.Get(paramType).value);
+        if paramCnt>1 then deklStr:=deklStr+'; ';
+        if paramTypes[msgCnt-1]='stringresult' then
+        begin
+          bStringResult:=true;
+          Assert(msgCnt=2);
+        end;
+        deklStr:=deklStr+paramNames[msgCnt-1]+': '+typeMap.Get(paramTypes[msgCnt-1]).value;
         otherStr:=lexer.NextToken;
         Assert((otherStr=',')or(otherStr=')'));
       until otherStr=')';
-      write(')');
+      deklStr:=deklStr+')';
       if funtype<>'void' then
-        write(': ',typeMap.Get(funtype).value);
-      write(';');
-      writeln;
+        deklStr:=deklStr+': '+typeMap.Get(funtype).value;
+      deklStr:=deklStr+';';
+      if bStringResult then
+        writeln(deklStr,' overload;')
+      else
+        writeln(deklStr);
+      writeln(deklStr);
+      writeln('begin');
+      write('  SendEditor(SCI_',name);//ADDTEXT, ALength, integer(AText));
+      Assert(paramTypes.Count=paramNames.Count);
+      if paramCnt>0 then
+      for i:=0 to paramNames.Count-1 do
+      begin
+        write(',');
+        if paramNames[i]='' then
+        begin
+          Assert(i=0);
+          write('0');
+        end
+        else if paramTypes[i]='int' then write(paramNames[i])
+        else write('Integer(',paramNames[i],')');
+      end;
+      writeln(');');
+      writeln('end;');
     end else if key='evt' then
     begin
       lexer.NextToken; //type
@@ -305,15 +364,55 @@ begin
       writeln(outF, '  SCN_',name,' = ',num,';');
     end;
   end;
+  paramTypes.Free;
+  paramNames.Free;
   lexer.Free;
   typeMap.Free;
   CloseFile(outF);
   CloseFile(f);
 end;
 
+{ TStringResultZ }
+
+constructor TStringResultZ.Create;
+var
+  f: TextFile;
+  line,funName: string;
+  lexer: TMiniLexer;
 begin
+  AssignFile(f, 'stringresult.dat');
+  Reset(f);
+  listZ:=TStringList.Create;
+  lexer:=TMiniLexer.Create;
+  while not eof(f) do
+  begin
+    readln(f, line);
+    line:=Trim(line);
+    if line='' then continue;
+    lexer.LoadText(line);
+    funName:=lexer.NextToken;
+    if lexer.NextToken='zero' then listZ.Add(funName);
+  end;
+  lexer.Free;
+  CloseFile(f);
+end;
+
+destructor TStringResultZ.Destroy;
+begin
+  listZ.Free;
+  inherited;
+end;
+
+function TStringResultZ.ifReturnsZ(funName: string): boolean;
+begin
+  result:=listZ.IndexOf(funName)>=0;
+end;
+
+begin
+  srz:=TStringResultZ.Create;
   //createH('Scintilla.iface');
   createPas('Scintilla.iface');
   //dump_types;
+  srz.Free;
 end.
 
