@@ -229,7 +229,7 @@ var
   partLexers: boolean;
   typeMap: THashTableSS;
   msgCnt,paramCnt: integer;
-  bStringResult: boolean;
+  bStringResult,bSep: boolean;
   deklStr: string;
   i:integer;
 begin
@@ -355,6 +355,68 @@ begin
       end;
       writeln(');');
       writeln('end;');
+      if bStringResult then
+      begin
+        deklStr:='function '+name+'(';
+        bSep:=false;
+        for i:=0 to paramNames.Count-1 do
+        begin
+          if paramTypes[i]='' then continue;
+          if paramTypes[i]='stringresult' then continue;
+          if (paramTypes[i]='int')and(paramNames[i]='length') then continue;
+          if bSep then deklStr:=deklStr+'; ';
+          deklStr:=deklStr+paramNames[i]+': '+typeMap.Get(paramTypes[i]).value;
+          bSep:=true;
+        end;
+        deklStr:=deklStr+'): AnsiString;';
+        writeln(deklStr,' overload;');
+        writeln(deklStr);
+        writeln('var');
+        writeln('  len: integer;');
+        writeln('begin');
+        write('  len:=',name,'(');
+        bSep:=false;
+        for i:=0 to paramNames.Count-1 do
+        begin
+          if paramTypes[i]='' then continue;
+          if bSep then write(',');
+          if paramTypes[i]='stringresult' then write('nil')
+          else if (paramTypes[i]='int')and(paramNames[i]='length') then write('0')
+          else write(paramNames[i]);
+          bSep:=true;
+        end;
+        writeln(');');
+        if srz.ifReturnsZ(name) then
+        begin
+          writeln('  if len<=0 then raise Exception.Create(''',name,' returns 0'');');
+          writeln('  if len=1 then');
+        end else writeln('  if len<=0 then');
+        writeln('  begin');
+        writeln('    result:='''';');
+        writeln('    exit;');
+        writeln('  end');
+        if srz.ifReturnsZ(name) then
+          writeln('  SetLength(result, len-1);')
+        else
+          writeln('  SetLength(result, len);');
+        write('  ',name,'(');
+        bSep:=false;
+        for i:=0 to paramNames.Count-1 do
+        begin
+          if paramTypes[i]='' then continue;
+          if bSep then write(',');
+          if paramTypes[i]='stringresult' then write('PAnsiChar(result)')
+          else if (paramTypes[i]='int')and(paramNames[i]='length') then write('len')
+          else write(paramNames[i]);
+          bSep:=true;
+        end;
+        write(');');
+        if srz.ifReturnsZ(name) then
+             writeln(' //last byte is #0')
+        else writeln;
+        writeln('end;');
+        writeln;
+      end;
     end else if key='evt' then
     begin
       lexer.NextToken; //type
