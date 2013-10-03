@@ -2,7 +2,8 @@
 program ifaceConv;
 
 uses
-  SysUtils;
+  SysUtils,
+  nHash;
 
 type
   TMiniLexer = class
@@ -179,6 +180,27 @@ begin
   writeln(f);
 end;
 
+procedure loadTypemap(filename: string);
+var
+  f: TextFile;
+  line: string;
+  lexer: TMiniLexer;
+  key, value: string;
+begin
+  AssignFile(f,filename);
+  Reset(f);
+  lexer:=TMiniLexer.Create;
+  while not eof(f) do
+  begin
+    readln(f, line);
+    lexer.LoadText(line);
+    key:=lexer.NextToken;
+    value:=lexer.NextToken;
+  end;
+  lexer.Free;
+  CloseFile(f);
+end;
+
 procedure createPas(filename: string);
 var
   f: TextFile;
@@ -189,6 +211,7 @@ var
   lexer: TMiniLexer;
   partLexers: boolean;
 begin
+  loadTypemap('typemapPas.dat');
   AssignFile(f,filename);
   AssignFile(outF,'..'+PathDelim+'consts.inc');
   Reset(f);
