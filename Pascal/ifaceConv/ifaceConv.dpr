@@ -180,7 +180,7 @@ begin
   writeln(f);
 end;
 
-procedure loadTypemap(filename: string);
+procedure loadTypemap(filename: string; map: THashTableSS);
 var
   f: TextFile;
   line: string;
@@ -196,6 +196,7 @@ begin
     lexer.LoadText(line);
     key:=lexer.NextToken;
     value:=lexer.NextToken;
+    map.Put(key, value);
   end;
   lexer.Free;
   CloseFile(f);
@@ -207,11 +208,14 @@ var
   outF: TextFile;
   lexUnitF: TextFile;
   line: string;
-  key,name,num: string;
+  key,funtype,name,num,paramType,paramName,otherStr: string;
   lexer: TMiniLexer;
   partLexers: boolean;
+  typeMap: THashTableSS;
+  paramCnt: integer;
 begin
-  loadTypemap('typemapPas.dat');
+  typeMap:=THashTableSS.Create(16);
+  loadTypemap('typemapPas.dat',typeMap);
   AssignFile(f,filename);
   AssignFile(outF,'..'+PathDelim+'consts.inc');
   Reset(f);
@@ -261,11 +265,37 @@ begin
     end
     else if (key='fun')or(key='get')or(key='set') then
     begin
-      lexer.NextToken; //type
+      funtype:=lexer.NextToken;
+      if funtype='void' then
+        write('procedure ')
+      else
+        write('function ');
       name:=lexer.NextToken;
+      write(name,'(');
       lexer.NextToken; //=
       num:=Hex2Pas(lexer.NextToken);
       writeln(outF, '  SCI_',name,' = ',num,';');
+      otherStr:=lexer.NextToken;
+      Assert(otherStr='(');
+      paramCnt:=0;
+      repeat
+        paramType:=lexer.NextToken;
+        if paramType=',' then continue;
+        if paramType=')' then break;
+        paramName:=lexer.NextToken;
+        Assert(paramName<>',');
+        Assert(paramName<>')');
+        inc(paramCnt);
+        if paramCnt>1 then write('; ');
+        write(paramName,': ',typeMap.Get(paramType).value);
+        otherStr:=lexer.NextToken;
+        Assert((otherStr=',')or(otherStr=')'));
+      until otherStr=')';
+      write(')');
+      if funtype<>'void' then
+        write(': ',typeMap.Get(funtype).value);
+      write(';');
+      writeln;
     end else if key='evt' then
     begin
       lexer.NextToken; //type
@@ -276,6 +306,7 @@ begin
     end;
   end;
   lexer.Free;
+  typeMap.Free;
   CloseFile(outF);
   CloseFile(f);
 end;
