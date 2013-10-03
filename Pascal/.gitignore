@@ -1,6 +1,6 @@
 LexConsts.pas
 consts.inc
-funDekl.inc
+funDecl.inc
 funBodies.inc
 
 lib

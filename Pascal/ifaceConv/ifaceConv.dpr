@@ -222,7 +222,7 @@ var
   f: TextFile;
   constsF: TextFile;
   lexUnitF: TextFile;
-  funDeklF: TextFile;
+  funDeclF: TextFile;
   funBodiesF: TextFile;
   line: string;
   key,funtype,name,num,otherStr: string;
@@ -232,18 +232,18 @@ var
   typeMap: THashTableSS;
   msgCnt,paramCnt: integer;
   bStringResult,bSep: boolean;
-  deklStr: string;
+  declStr,declStrB,subDeclStr: string;
   i:integer;
 begin
   typeMap:=THashTableSS.Create(16);
   loadTypemap('typemapPas.dat',typeMap);
   AssignFile(f,filename);
   AssignFile(constsF,'..'+PathDelim+'consts.inc');
-  AssignFile(funDeklF,'..'+PathDelim+'funDekl.inc');
+  AssignFile(funDeclF,'..'+PathDelim+'funDecl.inc');
   AssignFile(funBodiesF,'..'+PathDelim+'funBodies.inc');
   Reset(f);
   Rewrite(constsF);
-  Rewrite(funDeklF);
+  Rewrite(funDeclF);
   Rewrite(funBodiesF);
   HeaderAutoFile(constsF);
   writeln(constsF, 'const');
@@ -294,11 +294,14 @@ begin
     begin
       funtype:=lexer.NextToken;
       if funtype='void' then
-        deklStr:='procedure '
+        declStr:='procedure '
       else
-        deklStr:='function ';
+        declStr:='function ';
       name:=lexer.NextToken;
-      deklStr:=deklStr+name+'(';
+      declStrB:=declStr;
+      declStr:=declStr+name+'(';
+      declStrB:=declStrB+'TScintilla.'+name+'(';
+
       lexer.NextToken; //=
       num:=Hex2Pas(lexer.NextToken);
       writeln(constsF, '  SCI_',name,' = ',num,';');
@@ -309,6 +312,7 @@ begin
       bStringResult:=false;
       paramTypes.Clear;
       paramNames.Clear;
+      subDeclStr:='';
       repeat
         otherStr:=lexer.NextToken;
         inc(msgCnt);
@@ -323,27 +327,33 @@ begin
         otherStr:=lexer.NextToken;
         Assert(otherStr<>',');
         Assert(otherStr<>')');
-        paramNames.Add(otherStr);
+        if (otherStr='set')or(otherStr='type')or(otherStr='end') then
+          paramNames.Add(otherStr+'_')
+        else
+          paramNames.Add(otherStr);
         inc(paramCnt);
-        if paramCnt>1 then deklStr:=deklStr+'; ';
+
+        if paramCnt>1 then subDeclStr:=subDeclStr+'; ';
         if paramTypes[msgCnt-1]='stringresult' then
         begin
           bStringResult:=true;
           Assert(msgCnt=2);
         end;
-        deklStr:=deklStr+paramNames[msgCnt-1]+': '+typeMap.Get(paramTypes[msgCnt-1]).value;
+        subDeclStr:=subDeclStr+paramNames[msgCnt-1]+': '+typeMap.Get(paramTypes[msgCnt-1]).value;
         otherStr:=lexer.NextToken;
         Assert((otherStr=',')or(otherStr=')'));
       until otherStr=')';
-      deklStr:=deklStr+')';
+      subDeclStr:=subDeclStr+')';
       if funtype<>'void' then
-        deklStr:=deklStr+': '+typeMap.Get(funtype).value;
-      deklStr:=deklStr+';';
+        subDeclStr:=subDeclStr+': '+typeMap.Get(funtype).value;
+      subDeclStr:=subDeclStr+';';
+      declStr:=declStr+subDeclStr;
+      declStrB:=declStrB+subDeclStr;
       if bStringResult then
-        writeln(funDeklF, deklStr,' overload;')
+        writeln(funDeclF, declStr,' overload;')
       else
-        writeln(funDeklF, deklStr);
-      writeln(funBodiesF, deklStr);
+        writeln(funDeclF, declStr);
+      writeln(funBodiesF, declStrB);
       writeln(funBodiesF, 'begin');
       write(funBodiesF, '  SendEditor(SCI_',name);
       Assert(paramTypes.Count=paramNames.Count);
@@ -363,20 +373,24 @@ begin
       writeln(funBodiesF, 'end;');
       if bStringResult then
       begin
-        deklStr:='function '+name+'(';
+        declStr:='function '+name+'(';
+        declStrB:='function TScintilla.'+name+'(';
+        subDeclStr:='';
         bSep:=false;
         for i:=0 to paramNames.Count-1 do
         begin
           if paramTypes[i]='' then continue;
           if paramTypes[i]='stringresult' then continue;
           if (paramTypes[i]='int')and(paramNames[i]='length') then continue;
-          if bSep then deklStr:=deklStr+'; ';
-          deklStr:=deklStr+paramNames[i]+': '+typeMap.Get(paramTypes[i]).value;
+          if bSep then subDeclStr:=subDeclStr+'; ';
+          subDeclStr:=subDeclStr+paramNames[i]+': '+typeMap.Get(paramTypes[i]).value;
           bSep:=true;
         end;
-        deklStr:=deklStr+'): AnsiString;';
-        writeln(funDeklF, deklStr,' overload;');
-        writeln(funBodiesF, deklStr);
+        subDeclStr:=subDeclStr+'): AnsiString;';
+        declStr:=declStr+subDeclStr;
+        declStrB:=declStrB+subDeclStr;
+        writeln(funDeclF, declStr,' overload;');
+        writeln(funBodiesF, declStrB);
         writeln(funBodiesF, 'var');
         writeln(funBodiesF, '  len: integer;');
         writeln(funBodiesF, 'begin');
@@ -401,7 +415,7 @@ begin
         writeln(funBodiesF, '  begin');
         writeln(funBodiesF, '    result:='''';');
         writeln(funBodiesF, '    exit;');
-        writeln(funBodiesF, '  end');
+        writeln(funBodiesF, '  end;');
         if srz.ifReturnsZ(name) then
           writeln(funBodiesF, '  SetLength(result, len-1);')
         else
@@ -438,7 +452,7 @@ begin
   lexer.Free;
   typeMap.Free;
   CloseFile(constsF);
-  CloseFile(funDeklF);
+  CloseFile(funDeclF);
   CloseFile(funBodiesF);
   CloseFile(f);
 end;

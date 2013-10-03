@@ -34,14 +34,17 @@ type
   TSciCell = packed record
     charByte: AnsiChar;
     styleByte: Byte;
+    fillToInt: Word;
   end;
 
-  TSciCharacterRange = record
+  PSciCharacterRange = ^TSciCharacterRange;
+  TSciCharacterRange = packed record
     cpMin: Integer;
     cpMax: Integer;
   end;
 
-  TSciTextRange = record
+  PSciTextRange = ^TSciTextRange;
+  TSciTextRange = packed record
     chrg: TSciCharacterRange;
     lpstrText: PAnsiChar;
   end;
@@ -135,12 +138,13 @@ type
     procedure CNNotify(var AMessage: TWMNotify); message CN_NOTIFY;
     procedure MarginClick(nmhdr: PNMHdr);
   public
+    {$I funDecl.inc}
     /// <summary>Sends message to Scintilla control.
     function SendEditor(AMessage: Integer; WParam: Integer = 0; LParam: Integer = 0): Integer;
     procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure AddText(ALength: integer; AText: PAnsiChar); overload;
+{    procedure AddText(ALength: integer; AText: PAnsiChar); overload;
     procedure AddText(const AText: AnsiString); overload;
     function GetText(ALength: integer; AText: PAnsiChar): integer; overload;
     function GetText(): AnsiString; overload;
@@ -154,7 +158,7 @@ type
     function GetLength: integer;
     procedure SetWrapMode(Wrap: integer);
     procedure SetLexer(lexer: integer);
-    procedure SetLexerLanguage(language: PAnsiChar);
+    procedure SetLexerLanguage(language: PAnsiChar);}
   published
     property AccessMethod: TScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
     property Lexer: TLexer read FLexer;
@@ -173,6 +177,8 @@ uses
 
 
 { TScintilla }
+
+{$I funBodies.inc}
 
 constructor TScintilla.Create(AOwner: TComponent);
 begin
@@ -310,85 +316,6 @@ begin
     Result := FDirectFunction(FDirectPointer, AMessage, WParam, LParam);
 end;
 
-procedure TScintilla.AddText(ALength: integer; AText: PAnsiChar);
-begin
-  SendEditor(SCI_ADDTEXT, ALength, integer(AText));
-end;
-
-procedure TScintilla.AddText(const AText: AnsiString);
-begin
-  SendEditor(SCI_ADDTEXT, Length(AText), integer(PAnsiChar(AText)));
-end;
-
-function TScintilla.GetText(ALength: integer; AText: PAnsiChar): integer;
-begin
-  result:=SendEditor(SCI_GETTEXT, ALength, integer(AText));
-end;
-
-function TScintilla.GetText: AnsiString;
-var
-  len: integer;
-begin
-  len:=GetText(0,nil);
-  if len<=0 then raise Exception.Create('GetText returns 0');
-  if len=1 then
-  begin
-    result:='';
-    exit;
-  end;
-  SetLength(result, len-1);
-  GetText(len,PAnsiChar(result));//last byte is #0
-end;
-
-procedure TScintilla.StyleSetFont(AStyle: integer; AFontName: PAnsiChar);
-begin
-  SendEditor(SCI_StyleSetFont, AStyle, integer(AFontName));
-end;
-
-function TScintilla.StyleGetFont(AStyle: integer; AFontName: PAnsiChar): integer;
-begin
-  result:=SendEditor(SCI_StyleGetFont, AStyle, integer(AFontName));
-end;
-
-function TScintilla.StyleGetFont(AStyle: integer): AnsiString;
-var
-  len: integer;
-begin
-  len:=StyleGetFont(AStyle, nil);
-  if len=0 then
-  begin
-    result:='';
-    exit;
-  end;
-  SetLength(result, len);
-  StyleGetFont(AStyle,PAnsiChar(result));
-end;
-
-procedure TScintilla.ClearAll;
-begin
-  SendEditor(SCI_CLEARALL);
-end;
-
-function TScintilla.GetLength: integer;
-begin
-  result:=SendEditor(SCI_GETLENGTH);
-end;
-
-procedure TScintilla.SetWrapMode(Wrap: integer);
-begin
-  SendEditor(SCI_SETWRAPMODE, Wrap);
-end;
-
-procedure TScintilla.SetLexer(lexer: integer);
-begin
-  SendEditor(SCI_SETLEXER, lexer);
-end;
-
-procedure TScintilla.SetLexerLanguage(language: PAnsiChar);
-begin
-  SendEditor(SCI_SETLEXERLANGUAGE, 0, integer(language));
-end;
-
 procedure TScintilla.Fold;
 begin
   SendEditor(SCI_SETPROPERTY, integer(PAnsiChar('fold')), integer(PAnsiChar(AnsiString('1'))) );
@@ -419,21 +346,6 @@ begin
     FLexer:=FLexerClass.Create(self);
     FLexer.InitDefaults;
   end;
-end;
-
-procedure TScintilla.ClearDocumentStyle;
-begin
-  SendEditor(SCI_ClearDocumentStyle);
-end;
-
-function TScintilla.StyleGetSize(AStyle: integer): integer;
-begin
-  result:=SendEditor(SCI_StyleGetSize, AStyle);
-end;
-
-function TScintilla.StyleSetSize(AStyle,ASizePoints: integer): integer;
-begin
-  SendEditor(SCI_StyleSetSize, AStyle, ASizePoints);
 end;
 
 { TLexer }
