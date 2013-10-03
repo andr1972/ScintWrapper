@@ -1,5 +1,7 @@
 LexConsts.pas
 consts.inc
+funDekl.inc
+funBodies.inc
 
 lib
 backup

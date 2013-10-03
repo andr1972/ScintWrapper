@@ -220,8 +220,10 @@ end;
 procedure createPas(filename: string);
 var
   f: TextFile;
-  outF: TextFile;
+  constsF: TextFile;
   lexUnitF: TextFile;
+  funDeklF: TextFile;
+  funBodiesF: TextFile;
   line: string;
   key,funtype,name,num,otherStr: string;
   paramTypes,paramNames: TStringList;
@@ -236,11 +238,15 @@ begin
   typeMap:=THashTableSS.Create(16);
   loadTypemap('typemapPas.dat',typeMap);
   AssignFile(f,filename);
-  AssignFile(outF,'..'+PathDelim+'consts.inc');
+  AssignFile(constsF,'..'+PathDelim+'consts.inc');
+  AssignFile(funDeklF,'..'+PathDelim+'funDekl.inc');
+  AssignFile(funBodiesF,'..'+PathDelim+'funBodies.inc');
   Reset(f);
-  Rewrite(outF);
-  HeaderAutoFile(outF);
-  writeln(outF, 'const');
+  Rewrite(constsF);
+  Rewrite(funDeklF);
+  Rewrite(funBodiesF);
+  HeaderAutoFile(constsF);
+  writeln(constsF, 'const');
   lexer:=TMiniLexer.Create;
   partLexers:=false;
   paramTypes:=TStringList.Create;
@@ -282,7 +288,7 @@ begin
       if partlexers then
         writeln(lexUnitF, '  ',name,' = ',num,';')
       else
-        writeln(outF, '  ',name,' = ',num,';');
+        writeln(constsF, '  ',name,' = ',num,';');
     end
     else if (key='fun')or(key='get')or(key='set') then
     begin
@@ -295,7 +301,7 @@ begin
       deklStr:=deklStr+name+'(';
       lexer.NextToken; //=
       num:=Hex2Pas(lexer.NextToken);
-      writeln(outF, '  SCI_',name,' = ',num,';');
+      writeln(constsF, '  SCI_',name,' = ',num,';');
       otherStr:=lexer.NextToken;
       Assert(otherStr='(');
       msgCnt:=0;
@@ -334,27 +340,27 @@ begin
         deklStr:=deklStr+': '+typeMap.Get(funtype).value;
       deklStr:=deklStr+';';
       if bStringResult then
-        writeln(deklStr,' overload;')
+        writeln(funDeklF, deklStr,' overload;')
       else
-        writeln(deklStr);
-      writeln(deklStr);
-      writeln('begin');
-      write('  SendEditor(SCI_',name);//ADDTEXT, ALength, integer(AText));
+        writeln(funDeklF, deklStr);
+      writeln(funBodiesF, deklStr);
+      writeln(funBodiesF, 'begin');
+      write(funBodiesF, '  SendEditor(SCI_',name);
       Assert(paramTypes.Count=paramNames.Count);
       if paramCnt>0 then
       for i:=0 to paramNames.Count-1 do
       begin
-        write(',');
+        write(funBodiesF, ',');
         if paramNames[i]='' then
         begin
           Assert(i=0);
-          write('0');
+          write(funBodiesF, '0');
         end
-        else if paramTypes[i]='int' then write(paramNames[i])
-        else write('Integer(',paramNames[i],')');
+        else if paramTypes[i]='int' then write(funBodiesF, paramNames[i])
+        else write(funBodiesF, 'Integer(',paramNames[i],')');
       end;
-      writeln(');');
-      writeln('end;');
+      writeln(funBodiesF, ');');
+      writeln(funBodiesF, 'end;');
       if bStringResult then
       begin
         deklStr:='function '+name+'(';
@@ -369,53 +375,54 @@ begin
           bSep:=true;
         end;
         deklStr:=deklStr+'): AnsiString;';
-        writeln(deklStr,' overload;');
-        writeln(deklStr);
-        writeln('var');
-        writeln('  len: integer;');
-        writeln('begin');
-        write('  len:=',name,'(');
+        writeln(funDeklF, deklStr,' overload;');
+        writeln(funBodiesF, deklStr);
+        writeln(funBodiesF, 'var');
+        writeln(funBodiesF, '  len: integer;');
+        writeln(funBodiesF, 'begin');
+        write(funBodiesF, '  len:=',name,'(');
         bSep:=false;
         for i:=0 to paramNames.Count-1 do
         begin
           if paramTypes[i]='' then continue;
-          if bSep then write(',');
-          if paramTypes[i]='stringresult' then write('nil')
-          else if (paramTypes[i]='int')and(paramNames[i]='length') then write('0')
-          else write(paramNames[i]);
+          if bSep then write(funBodiesF, ',');
+          if paramTypes[i]='stringresult' then write(funBodiesF, 'nil')
+          else if (paramTypes[i]='int')and(paramNames[i]='length') then
+            write(funBodiesF, '0')
+          else write(funBodiesF, paramNames[i]);
           bSep:=true;
         end;
-        writeln(');');
+        writeln(funBodiesF, ');');
         if srz.ifReturnsZ(name) then
         begin
-          writeln('  if len<=0 then raise Exception.Create(''',name,' returns 0'');');
-          writeln('  if len=1 then');
-        end else writeln('  if len<=0 then');
-        writeln('  begin');
-        writeln('    result:='''';');
-        writeln('    exit;');
-        writeln('  end');
+          writeln(funBodiesF, '  if len<=0 then raise Exception.Create(''',name,' returns 0'');');
+          writeln(funBodiesF, '  if len=1 then');
+        end else writeln(funBodiesF, '  if len<=0 then');
+        writeln(funBodiesF, '  begin');
+        writeln(funBodiesF, '    result:='''';');
+        writeln(funBodiesF, '    exit;');
+        writeln(funBodiesF, '  end');
         if srz.ifReturnsZ(name) then
-          writeln('  SetLength(result, len-1);')
+          writeln(funBodiesF, '  SetLength(result, len-1);')
         else
-          writeln('  SetLength(result, len);');
-        write('  ',name,'(');
+          writeln(funBodiesF, '  SetLength(result, len);');
+        write(funBodiesF, '  ',name,'(');
         bSep:=false;
         for i:=0 to paramNames.Count-1 do
         begin
           if paramTypes[i]='' then continue;
-          if bSep then write(',');
-          if paramTypes[i]='stringresult' then write('PAnsiChar(result)')
-          else if (paramTypes[i]='int')and(paramNames[i]='length') then write('len')
-          else write(paramNames[i]);
+          if bSep then write(funBodiesF, ',');
+          if paramTypes[i]='stringresult' then write(funBodiesF, 'PAnsiChar(result)')
+          else if (paramTypes[i]='int')and(paramNames[i]='length') then
+            write(funBodiesF, 'len')
+          else write(funBodiesF, paramNames[i]);
           bSep:=true;
         end;
-        write(');');
+        write(funBodiesF, ');');
         if srz.ifReturnsZ(name) then
-             writeln(' //last byte is #0')
-        else writeln;
-        writeln('end;');
-        writeln;
+             writeln(funBodiesF, ' //last byte is #0')
+        else writeln(funBodiesF);
+        writeln(funBodiesF, 'end;');
       end;
     end else if key='evt' then
     begin
@@ -423,14 +430,16 @@ begin
       name:=lexer.NextToken;
       lexer.NextToken; //=
       num:=Hex2Pas(lexer.NextToken);
-      writeln(outF, '  SCN_',name,' = ',num,';');
+      writeln(constsF, '  SCN_',name,' = ',num,';');
     end;
   end;
   paramTypes.Free;
   paramNames.Free;
   lexer.Free;
   typeMap.Free;
-  CloseFile(outF);
+  CloseFile(constsF);
+  CloseFile(funDeklF);
+  CloseFile(funBodiesF);
   CloseFile(f);
 end;
 
