@@ -144,21 +144,6 @@ type
     procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-{    procedure AddText(ALength: integer; AText: PAnsiChar); overload;
-    procedure AddText(const AText: AnsiString); overload;
-    function GetText(ALength: integer; AText: PAnsiChar): integer; overload;
-    function GetText(): AnsiString; overload;
-    function StyleGetFont(AStyle: integer; AFontName: PAnsiChar): integer; overload;
-    function StyleGetFont(AStyle: integer): AnsiString; overload;
-    procedure StyleSetFont(AStyle: integer; AFontName: PAnsiChar);
-    function StyleGetSize(AStyle: integer): integer;
-    function StyleSetSize(AStyle,ASizePoints: integer): integer;
-    procedure ClearAll;
-    procedure ClearDocumentStyle;
-    function GetLength: integer;
-    procedure SetWrapMode(Wrap: integer);
-    procedure SetLexer(lexer: integer);
-    procedure SetLexerLanguage(language: PAnsiChar);}
   published
     property AccessMethod: TScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
     property Lexer: TLexer read FLexer;
