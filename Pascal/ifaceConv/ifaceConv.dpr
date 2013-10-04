@@ -349,18 +349,22 @@ begin
       subDeclStr:=subDeclStr+';';
       declStr:=declStr+subDeclStr;
       declStrB:=declStrB+subDeclStr;
-      if bStringResult then
+      if bStringResult or ((paramTypes.Count=2)
+        and(paramTypes[0]='int')and(paramNames[0]='length')
+        and(paramTypes[1]='string')and(paramNames[1]='text')) then
         writeln(funDeclF, declStr,' overload;')
       else
         writeln(funDeclF, declStr);
       writeln(funBodiesF, declStrB);
       writeln(funBodiesF, 'begin');
-      write(funBodiesF, '  SendEditor(SCI_',name);
+      write(funBodiesF, '  ');
+      if funtype<>'void' then write(funBodiesF, 'result := ');
+      write(funBodiesF, 'SendEditor(SCI_',name);
       Assert(paramTypes.Count=paramNames.Count);
       if paramCnt>0 then
       for i:=0 to paramNames.Count-1 do
       begin
-        write(funBodiesF, ',');
+        write(funBodiesF, ', ');
         if paramNames[i]='' then
         begin
           Assert(i=0);
@@ -369,7 +373,10 @@ begin
         else if paramTypes[i]='int' then write(funBodiesF, paramNames[i])
         else write(funBodiesF, 'Integer(',paramNames[i],')');
       end;
-      writeln(funBodiesF, ');');
+      if funtype='bool' then
+        writeln(funBodiesF, ') <> 0;')
+      else
+        writeln(funBodiesF, ');');
       writeln(funBodiesF, 'end;');
       if bStringResult then
       begin
@@ -413,7 +420,7 @@ begin
           writeln(funBodiesF, '  if len=1 then');
         end else writeln(funBodiesF, '  if len<=0 then');
         writeln(funBodiesF, '  begin');
-        writeln(funBodiesF, '    result:='''';');
+        writeln(funBodiesF, '    result := '''';');
         writeln(funBodiesF, '    exit;');
         writeln(funBodiesF, '  end;');
         if srz.ifReturnsZ(name) then
@@ -436,6 +443,32 @@ begin
         if srz.ifReturnsZ(name) then
              writeln(funBodiesF, ' //last byte is #0')
         else writeln(funBodiesF);
+        writeln(funBodiesF, 'end;');
+      end else
+      if (paramTypes.Count=2)
+        and(paramTypes[0]='int')and(paramNames[0]='length')
+        and(paramTypes[1]='string')and(paramNames[1]='text') then
+      begin
+        if funtype='void' then
+          declStr:='procedure '
+        else
+          declStr:='function ';
+        declStrB:=declStr;
+        declStr:=declStr+name+'(const text: AnsiString)';
+        declStrB:=declStrB+'TScintilla.'+name+'(const text: AnsiString)';
+        if funtype<>'void' then
+            subDeclStr:=': '+typeMap.Get(funtype).value
+        else
+           subDeclStr:='';
+        subDeclStr:=subDeclStr+';';
+        declStr:=declStr+subDeclStr+' overload;';
+        declStrB:=declStrB+subDeclStr;
+        writeln(funDeclF, declStr);
+        writeln(funBodiesF, declStrB);
+        writeln(funBodiesF, 'begin');
+        write(funBodiesF, '  ');
+        if funtype<>'void' then write(funBodiesF, 'result := ');
+        writeln(funBodiesF, name,'(Length(text), PAnsiChar(text));');
         writeln(funBodiesF, 'end;');
       end;
     end else if key='evt' then
