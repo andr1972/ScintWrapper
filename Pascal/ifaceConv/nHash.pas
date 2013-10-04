@@ -1,6 +1,11 @@
 // GNU LESSER GENERAL PUBLIC LICENSE - See lgpl.txt
 unit nHash;
 
+{$ifdef FPC}
+{$asmmode intel}
+{$mode Delphi}
+{$endif}
+
 interface
 uses
   nStrings;
@@ -407,12 +412,12 @@ end;
 
 procedure THashTableII.AssignKey(item: PHashItemII; key: integer);
 begin
-  item.key := key;
+  item^.key := key;
 end;
 
 procedure THashTableII.AssignValue(item: PHashItemII; value: integer);
 begin
-  item.value := value;
+  item^.value := value;
 end;
 
 procedure THashTableII.Clear;
@@ -426,14 +431,14 @@ begin
     while item <> nil do
     begin
       p := item;
-      item := item.next;
+      item := item^.next;
       DisposeItem(p);
     end;
   end;
 end;
 
 { Returns the index of most significant set bit; for 0 return 0 }
-function FindMostSignSetBit(N: Cardinal): integer;
+function FindMostSignSetBit(N: Cardinal): integer; assembler;
 asm {On entry: eax = ACardinal}
   bsr eax, eax
 end;

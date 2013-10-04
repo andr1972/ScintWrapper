@@ -1,9 +1,21 @@
 unit BenchmarkFrm;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+{$IFDEF FPC}
+  LCLIntf, LCLType, LMessages,
+{$ENDIF}
+{$IFDEF MSWindows}
+  Windows,
+{$ELSE}
+  libc,
+{$ENDIF}
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, Scintilla;
 
 type
@@ -48,11 +60,15 @@ var
   i64a,i64b,i64f:int64;
   Msg: AnsiString;
 begin
+{$IFDEF MSWindows}
   QueryPerformanceFrequency(i64f);
   QueryPerformanceCounter(i64a);
+{$ENDIF}
   Scintilla1.ClearAll;
   for i:=0 to COUNT-1 do Scintilla1.GetLength;
+{$IFDEF MSWindows}
   QueryPerformanceCounter(i64b);
+{$ENDIF}
   Msg:=Format('Time of %d calls of GetLength is %.3f us per one',
               [Count, (i64b-i64a)/i64f*1e6/COUNT]);
 

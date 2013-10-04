@@ -1,7 +1,11 @@
 program Benchmark;
 
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 uses
-  Forms,
+  Forms, Interfaces,
   BenchmarkFrm in 'BenchmarkFrm.pas' {Form1};
 
 {$R *.res}

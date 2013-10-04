@@ -339,13 +339,13 @@ begin
           bStringResult:=true;
           Assert(msgCnt=2);
         end;
-        subDeclStr:=subDeclStr+paramNames[msgCnt-1]+': '+typeMap.Get(paramTypes[msgCnt-1]).value;
+        subDeclStr:=subDeclStr+paramNames[msgCnt-1]+': '+typeMap.Get(paramTypes[msgCnt-1])^.value;
         otherStr:=lexer.NextToken;
         Assert((otherStr=',')or(otherStr=')'));
       until otherStr=')';
       subDeclStr:=subDeclStr+')';
       if funtype<>'void' then
-        subDeclStr:=subDeclStr+': '+typeMap.Get(funtype).value;
+        subDeclStr:=subDeclStr+': '+typeMap.Get(funtype)^.value;
       subDeclStr:=subDeclStr+';';
       declStr:=declStr+subDeclStr;
       declStrB:=declStrB+subDeclStr;
@@ -390,7 +390,7 @@ begin
           if paramTypes[i]='stringresult' then continue;
           if (paramTypes[i]='int')and(paramNames[i]='length') then continue;
           if bSep then subDeclStr:=subDeclStr+'; ';
-          subDeclStr:=subDeclStr+paramNames[i]+': '+typeMap.Get(paramTypes[i]).value;
+          subDeclStr:=subDeclStr+paramNames[i]+': '+typeMap.Get(paramTypes[i])^.value;
           bSep:=true;
         end;
         subDeclStr:=subDeclStr+'): AnsiString;';
@@ -457,7 +457,7 @@ begin
         declStr:=declStr+name+'(const text: AnsiString)';
         declStrB:=declStrB+'TScintilla.'+name+'(const text: AnsiString)';
         if funtype<>'void' then
-            subDeclStr:=': '+typeMap.Get(funtype).value
+            subDeclStr:=': '+typeMap.Get(funtype)^.value
         else
            subDeclStr:='';
         subDeclStr:=subDeclStr+';';

@@ -2,6 +2,10 @@
 //this file is part neoPack package
 unit nStrings;
 
+{$ifdef FPC}
+{$asmmode intel}
+{$endif}
+
 interface
 
 type
@@ -204,7 +208,7 @@ end;
 {$ifend}
 
 //StrIn and StrOut can be the same AnsiString
-procedure iStrConvert(StrIn,StrOut,Tab: PAnsiChar);
+procedure iStrConvert(StrIn,StrOut,Tab: PAnsiChar); assembler;
 asm
     push  edi
     push  esi
