@@ -116,6 +116,8 @@ type
   end;
   TLexerClass = class of TLexer;
 
+  { TScintilla }
+
   TScintilla = class(TWinControl)
   private
     FSciDllHandle: HMODULE;
@@ -128,11 +130,9 @@ type
     procedure FreeSciLibrary;
     procedure SetLexerClass(const Value: TLexerClass);
   protected
-    procedure CreateWnd; override;
     procedure CreateParams(var Params: TCreateParams); override;
     procedure WMEraseBkgnd(var AMessage: TWmEraseBkgnd); message WM_ERASEBKGND;
     procedure WMGetDlgCode(var AMessage: TWMGetDlgCode); message WM_GETDLGCODE;
-    procedure WMCreate(var AMessage: TWMCreate); message WM_CREATE;
     procedure WMDestroy(var AMessage: TWMDestroy); message WM_DESTROY;
     /// <summary>Handles notification messages from Scintilla</summary>
     procedure CNNotify(var AMessage: TWMNotify); message CN_NOTIFY;
@@ -144,9 +144,9 @@ type
     procedure Fold; virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    property Lexer: TLexer read FLexer;
   published
     property AccessMethod: TScintillaMethod read FAccessMethod write FAccessMethod default smDirect;
-    property Lexer: TLexer read FLexer;
     property LexerClass: TLexerClass read FLexerClass write SetLexerClass;
     property Align;
     property Anchors;
@@ -175,7 +175,12 @@ begin
   FLexerClass := TDefaultLexer;
   if not(csDesigning in ComponentState) then
   begin
+    LoadSciLibraryIfNeeded;
     HandleNeeded;
+    FDirectFunction := TScintillaFunction(
+           Windows.SendMessage(WindowHandle, SCI_GETDIRECTFUNCTION, 0, 0));
+    FDirectPointer := Pointer(
+           Windows.SendMessage(WindowHandle, SCI_GETDIRECTPOINTER, 0, 0));
     SendEditor(Sci_SetCodePage, SC_CP_UTF8);
     SendEditor(SCI_SetKeysUnicode, 1);
     SendEditor(SCI_STYLESETFORE, STYLE_DEFAULT, clBlack);
@@ -214,28 +219,10 @@ begin
     end;
 end;
 
-procedure TScintilla.CreateWnd;
-begin
-  // Load Scintilla if not loaded already.
-  // Library must be loaded before subclassing/creating window
-  LoadSciLibraryIfNeeded;
-  inherited CreateWnd;
-end;
-
 procedure TScintilla.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
-  // Subclass Scintilla - WND Class was registred at DLL load proc
   CreateSubClass(Params, 'SCINTILLA');
-end;
-
-procedure TScintilla.WMCreate(var AMessage: TWMCreate);
-begin
-  inherited;
-  FDirectFunction := TScintillaFunction(Windows.SendMessage(
-    WindowHandle, SCI_GETDIRECTFUNCTION, 0, 0));
-  FDirectPointer := Pointer(Windows.SendMessage(
-    WindowHandle, SCI_GETDIRECTPOINTER, 0, 0));
 end;
 
 procedure TScintilla.WMDestroy(var AMessage: TWMDestroy);
@@ -294,7 +281,7 @@ begin
     inherited;
 end;
 
-function TScintilla.SendEditor(AMessage, WParam,
+function TScintilla.SendEditor(AMessage: Integer; WParam: Integer;
   LParam: Integer): Integer;
 begin
   if (FAccessMethod = smMessages) then
