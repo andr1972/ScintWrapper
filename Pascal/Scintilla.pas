@@ -167,6 +167,7 @@ uses
 constructor TScintilla.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  Parent:=AOwner as TWinControl;
   FAccessMethod := smDirect;
   Width := 320;
   Height := 240;
