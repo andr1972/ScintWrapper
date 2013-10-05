@@ -158,8 +158,7 @@ type
 implementation
 
 uses
-  Dialogs;
-
+  DefaultLexer;
 
 { TScintilla }
 
@@ -171,6 +170,8 @@ begin
   FAccessMethod := smDirect;
   Width := 320;
   Height := 240;
+  FLexer := TDefaultLexer.Create(self);
+  FLexerClass := TDefaultLexer;
   if not(csDesigning in ComponentState) then
   begin
     HandleNeeded;
